@@ -1414,7 +1414,7 @@ button {
 
     .logo {
         width: 150px;
-        height: 80px;
+        height: 65px;
     }
 
     .navbar {
@@ -1613,7 +1613,7 @@ button {
 
     .logo {
         width: 150px;
-        height: 80px;
+        height: 65px;
     }
 
     .nav-actions {
@@ -1714,60 +1714,27 @@ button {
 
     /* ---------- CATEGORY ---------- */
 
-    /* Category Cards */
-    .category-card {
-        margin-bottom: 22px;
-        border-radius: 22px;
-        overflow: hidden;
+    .category-grid {
+        grid-template-columns: 1fr;
+
+        gap: 18px;
     }
 
-    /* Category Image - Medium Size */
-    .category-card img {
-        width: 100%;
-        height: 220px;
-        object-fit: cover;
-        display: block;
+    .category-image {
+        height: 210px;
     }
 
-    /* Category Content */
-    .category-card-content {
-        padding: 24px 22px;
+    .category-content {
+        padding: 20px;
     }
 
-    /* Category Number */
-    .category-card .category-number,
-    .category-card .number {
-        font-size: 15px;
-        margin-bottom: 14px;
+    .category-content h3 {
+        font-size: 18px;
     }
 
-    /* Category Title */
-    .category-card h2,
-    .category-card h3 {
-        font-size: 24px;
-        line-height: 1.25;
-        margin-bottom: 14px;
+    .category-content p {
+        font-size: 12px;
     }
-
-    /* Category Description */
-    .category-card p {
-        font-size: 16px;
-        line-height: 1.6;
-        margin-bottom: 20px;
-    }
-
-    /* View Products */
-    .category-card a {
-        font-size: 16px;
-    }
-
-    /* Reduce space between category sections */
-    .categories,
-    .category-section {
-        padding-top: 30px;
-        padding-bottom: 30px;
-    }
-
 
     /* ---------- PRODUCT ---------- */
 
@@ -2302,37 +2269,3 @@ button {
         font-size: 16px;
         line-height: 1.5;
     }
-
-/* =========================================
-   SMALL MOBILE PHONES
-   ========================================= */
-
-@media (max-width: 480px) {
-
-    .category-card {
-        margin-bottom: 18px;
-        border-radius: 20px;
-    }
-
-    .category-card img {
-        height: 210px;
-    }
-
-    .category-card-content {
-        padding: 22px 20px;
-    }
-
-    .category-card h2,
-    .category-card h3 {
-        font-size: 22px;
-    }
-
-    .category-card p {
-        font-size: 15px;
-        line-height: 1.55;
-    }
-
-    .category-card a {
-        font-size: 15px;
-    }
-}
