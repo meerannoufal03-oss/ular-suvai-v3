@@ -129,16 +129,14 @@ button {
 ========================================================= */
 
 .logo {
-    width: 62px;
-    height: 62px;
+    width: 150px;
+    height: 80px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    background: var(--white);
-
-    border-radius: 8px;
+    border-radius: 15px;
 
     overflow: hidden;
 
@@ -1168,16 +1166,14 @@ button {
 ========================================================= */
 
 .footer-logo {
-    width: 72px;
-    height: 72px;
+    width: 150px;
+    height: 80px;
 
     margin-bottom: 20px;
 
     display: flex;
 
-    background: var(--white);
-
-    border-radius: 8px;
+    border-radius: 15px;
 
     overflow: hidden;
 }
@@ -1417,8 +1413,8 @@ button {
     }
 
     .logo {
-        width: 55px;
-        height: 55px;
+        width: 150px;
+        height: 80px;
     }
 
     .navbar {
@@ -1616,8 +1612,8 @@ button {
     }
 
     .logo {
-        width: 50px;
-        height: 50px;
+        width: 150px;
+        height: 80px;
     }
 
     .nav-actions {
@@ -1718,26 +1714,58 @@ button {
 
     /* ---------- CATEGORY ---------- */
 
-    .category-grid {
-        grid-template-columns: 1fr;
-
-        gap: 18px;
+    /* Category Cards */
+    .category-card {
+        margin-bottom: 22px;
+        border-radius: 22px;
+        overflow: hidden;
     }
 
-    .category-image {
-        height: 210px;
+    /* Category Image - Medium Size */
+    .category-card img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
     }
 
-    .category-content {
-        padding: 20px;
+    /* Category Content */
+    .category-card-content {
+        padding: 24px 22px;
     }
 
-    .category-content h3 {
-        font-size: 18px;
+    /* Category Number */
+    .category-card .category-number,
+    .category-card .number {
+        font-size: 15px;
+        margin-bottom: 14px;
     }
 
-    .category-content p {
-        font-size: 12px;
+    /* Category Title */
+    .category-card h2,
+    .category-card h3 {
+        font-size: 24px;
+        line-height: 1.25;
+        margin-bottom: 14px;
+    }
+
+    /* Category Description */
+    .category-card p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    /* View Products */
+    .category-card a {
+        font-size: 16px;
+    }
+
+    /* Reduce space between category sections */
+    .categories,
+    .category-section {
+        padding-top: 30px;
+        padding-bottom: 30px;
     }
 
 
@@ -1947,8 +1975,8 @@ button {
     }
 
     .footer-logo {
-        width: 62px;
-        height: 62px;
+        width: 150px;
+        height: 80px;
     }
 
     .footer-brand > p {
@@ -2181,4 +2209,130 @@ button {
         padding-bottom: 5px;
     }
 
+}
+/* =========================================================
+   PRODUCT ORDER BUTTON
+========================================================= */
+
+.product-order-btn {
+    width: 100%;
+
+    min-height: 40px;
+
+    margin-top: 15px;
+
+    border: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    border-radius: 6px;
+
+    background: var(--primary);
+
+    color: var(--white);
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+}
+
+.product-order-btn:hover {
+    background: var(--accent);
+
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   IMAGE FALLBACK
+========================================================= */
+
+.image-error {
+    background: #eee4d5;
+
+    object-fit: contain !important;
+}
+
+
+/* =========================================================
+   MOBILE ORDER BUTTON
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .product-order-btn {
+        min-height: 36px;
+
+        margin-top: 10px;
+
+        font-size: 10px;
+    }
+
+}
+/* =====================================
+       SEARCH PRODUCTS - HIDE ON MOBILE
+       ===================================== */
+
+    .search-section,
+    .search-container,
+    .product-search,
+    .search-products,
+    #search,
+    #searchSection {
+        display: none !important;
+    }
+
+
+    /* Product Category Heading */
+    .products-section h2 {
+        font-size: 28px;
+        line-height: 1.25;
+    }
+
+    .products-section p {
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+/* =========================================
+   SMALL MOBILE PHONES
+   ========================================= */
+
+@media (max-width: 480px) {
+
+    .category-card {
+        margin-bottom: 18px;
+        border-radius: 20px;
+    }
+
+    .category-card img {
+        height: 210px;
+    }
+
+    .category-card-content {
+        padding: 22px 20px;
+    }
+
+    .category-card h2,
+    .category-card h3 {
+        font-size: 22px;
+    }
+
+    .category-card p {
+        font-size: 15px;
+        line-height: 1.55;
+    }
+
+    .category-card a {
+        font-size: 15px;
+    }
 }
