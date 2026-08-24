@@ -2269,3 +2269,83 @@ button {
         font-size: 16px;
         line-height: 1.5;
     }
+
+    /* =========================================================
+   CATEGORY CARDS - MEDIUM MOBILE SIZE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .category-grid {
+        gap: 14px;
+    }
+
+    .category-card {
+        border-radius: 14px;
+    }
+
+    .category-image {
+        height: 155px;
+    }
+
+    .category-content {
+        padding: 18px 20px;
+    }
+
+    .category-number {
+        font-size: 10px;
+    }
+
+    .category-content h3 {
+        font-size: 17px;
+        line-height: 1.3;
+        margin: 5px 0 8px;
+    }
+
+    .category-content p {
+        font-size: 11px;
+        line-height: 1.6;
+        margin-bottom: 14px;
+    }
+
+    .category-link {
+        font-size: 12px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE - EXTRA COMPACT
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .category-grid {
+        gap: 12px;
+    }
+
+    .category-image {
+        height: 145px;
+    }
+
+    .category-content {
+        padding: 16px 18px;
+    }
+
+    .category-number {
+        font-size: 9px;
+    }
+
+    .category-content h3 {
+        font-size: 16px;
+    }
+
+    .category-content p {
+        font-size: 10.5px;
+        line-height: 1.55;
+    }
+
+    .category-link {
+        font-size: 11px;
+    }
+}
