@@ -325,9 +325,6 @@ if (searchButton) {
 
             </div>
 
-            <p id="searchMessage">
-                Search for your favourite product
-            </p>
 
         </div>
     `;
@@ -380,16 +377,6 @@ if (searchButton) {
                 card.style.display = "";
 
             });
-
-            const message =
-                document.getElementById("searchMessage");
-
-            if (message) {
-
-                message.textContent =
-                    "Search for your favourite product";
-
-            }
 
         });
 
@@ -593,3 +580,316 @@ productCards.forEach((card) => {
     );
 
 });
+
+// =========================================================
+// ULAR SUVAI
+// FINAL CONNECTION - PART 9
+// =========================================================
+
+
+// =========================================================
+// WHATSAPP NUMBER
+// =========================================================
+
+// IMPORTANT:
+// 91 + mobile number மட்டும்.
+// + symbol, spaces use panna vendam.
+
+const ULAR_SUVAI_WHATSAPP = "919XXXXXXXXX";
+
+
+// =========================================================
+// OPEN WHATSAPP ORDER
+// =========================================================
+
+function orderOnWhatsApp(productName) {
+
+    if (!productName) return;
+
+    const message =
+        `Hi Ular Suvai 👋\n\n` +
+        `I am interested in: ${productName}\n\n` +
+        `Please share the price and availability.`;
+
+    const whatsappURL =
+        `https://wa.me/${ULAR_SUVAI_WHATSAPP}?text=${encodeURIComponent(message)}`;
+
+    window.open(
+        whatsappURL,
+        "_blank"
+    );
+}
+
+
+// =========================================================
+// HERO WHATSAPP BUTTON
+// =========================================================
+
+const whatsappButtons =
+    document.querySelectorAll(
+        ".whatsapp-button, .hero .btn-outline"
+    );
+
+whatsappButtons.forEach((button) => {
+
+    button.addEventListener("click", (event) => {
+
+        const href =
+            button.getAttribute("href");
+
+        // If button already has a real WhatsApp link,
+        // don't override it.
+        if (
+            href &&
+            href.includes("wa.me")
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        orderOnWhatsApp(
+            "Ular Suvai Products"
+        );
+
+    });
+
+});
+
+
+// =========================================================
+// PRODUCT CARDS
+// =========================================================
+
+const allProductCards =
+    document.querySelectorAll(
+        ".product-card"
+    );
+
+allProductCards.forEach((card) => {
+
+    const productNameElement =
+        card.querySelector("h3");
+
+    if (!productNameElement) return;
+
+    const productName =
+        productNameElement.textContent.trim();
+
+
+    // Remove old click listener issue
+    // by adding a separate order button.
+
+    let orderButton =
+        card.querySelector(".product-order-btn");
+
+
+    if (!orderButton) {
+
+        orderButton =
+            document.createElement("button");
+
+        orderButton.className =
+            "product-order-btn";
+
+        orderButton.innerHTML =
+            `<i class="fa-brands fa-whatsapp"></i>
+             Order`;
+
+        const productInfo =
+            card.querySelector(".product-info");
+
+        if (productInfo) {
+
+            productInfo.appendChild(
+                orderButton
+            );
+
+        }
+
+    }
+
+
+    orderButton.addEventListener(
+        "click",
+        (event) => {
+
+            event.stopPropagation();
+
+            orderOnWhatsApp(
+                productName
+            );
+
+        }
+    );
+
+});
+
+
+// =========================================================
+// CATEGORY LINKS
+// =========================================================
+
+const categoryLinks =
+    document.querySelectorAll(
+        ".category-link"
+    );
+
+categoryLinks.forEach((link) => {
+
+    link.addEventListener(
+        "click",
+        (event) => {
+
+            const targetId =
+                link.getAttribute("href");
+
+            if (
+                !targetId ||
+                targetId === "#"
+            ) {
+                return;
+            }
+
+            const target =
+                document.querySelector(
+                    targetId
+                );
+
+            if (!target) return;
+
+            event.preventDefault();
+
+            const headerHeight =
+                header
+                    ? header.offsetHeight
+                    : 0;
+
+            const targetPosition =
+                target.offsetTop -
+                headerHeight;
+
+            window.scrollTo({
+
+                top: targetPosition,
+
+                behavior: "smooth"
+
+            });
+
+        }
+    );
+
+});
+
+
+// =========================================================
+// IMAGE ERROR FALLBACK
+// =========================================================
+
+const allImages =
+    document.querySelectorAll(
+        "img"
+    );
+
+allImages.forEach((image) => {
+
+    image.addEventListener(
+        "error",
+        () => {
+
+            image.classList.add(
+                "image-error"
+            );
+
+            image.alt =
+                "Ular Suvai Product Image";
+
+        }
+    );
+
+});
+
+
+// =========================================================
+// MOBILE MENU - CLOSE AFTER RESIZE
+// =========================================================
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        if (
+            window.innerWidth > 992 &&
+            navbar
+        ) {
+
+            navbar.classList.remove(
+                "active"
+            );
+
+            if (menuToggle) {
+
+                const icon =
+                    menuToggle.querySelector(
+                        "i"
+                    );
+
+                if (icon) {
+
+                    icon.classList.remove(
+                        "fa-xmark"
+                    );
+
+                    icon.classList.add(
+                        "fa-bars"
+                    );
+
+                }
+
+            }
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// PREVENT FORM SUBMIT RELOAD
+// =========================================================
+
+const forms =
+    document.querySelectorAll(
+        "form"
+    );
+
+forms.forEach((form) => {
+
+    form.addEventListener(
+        "submit",
+        (event) => {
+
+            event.preventDefault();
+
+        }
+    );
+
+});
+
+
+// =========================================================
+// PAGE LOADED
+// =========================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        console.log(
+            "Ular Suvai website loaded successfully."
+        );
+
+    }
+);
+
