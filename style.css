@@ -452,7 +452,7 @@ button {
 }
 
 .category-card {
-    background: var(--white);
+    background: wheat;
 
     border-radius: var(--radius);
 
