@@ -1628,60 +1628,47 @@ button {
 
     /* ---------- HERO ---------- */
 
+/* =================================
+   MOBILE HERO - RECTANGLE FULL IMAGE
+   ================================= */
+
+@media (max-width: 768px) {
+
     .hero {
-        min-height: 600px;
+        min-height: 0;
+        height: 430px;
 
-        background-position: center;
-    }
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
 
-    .hero-overlay {
-        background:
-            linear-gradient(
-                90deg,
-                rgba(43, 30, 25, 0.82),
-                rgba(43, 30, 25, 0.45)
-            );
+        display: flex;
+        align-items: center;
     }
 
     .hero-content {
-        padding-top: 55px;
-
-        max-width: 100%;
-    }
-
-    .hero-small-title {
-        font-size: 10px;
-
-        letter-spacing: 1.5px;
+        width: 100%;
+        padding: 40px 28px;
     }
 
     .hero h1 {
-        font-size: 40px;
-
-        line-height: 1.15;
+        font-size: 42px;
+        line-height: 1.12;
+        margin-bottom: 20px;
     }
 
     .hero p {
-        max-width: 500px;
-
-        font-size: 13px;
-
-        line-height: 1.7;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 28px;
     }
 
     .hero-buttons {
+        display: flex;
         flex-wrap: wrap;
-
-        gap: 10px;
+        gap: 14px;
     }
-
-    .btn {
-        min-height: 46px;
-
-        padding: 0 19px;
-
-        font-size: 12px;
-    }
+}
 
 
     /* ---------- SECTION HEADING ---------- */
@@ -2374,52 +2361,11 @@ button {
 /* Mobile Halal Badge */
 @media (max-width: 768px) {
     .halal-badge {
-        top: 6px;
-        right: 6px;
-        padding: 5px 8px;
-        font-size: 9px;
+        top: 4px;
+        right: 4px;
+        padding: 4px 7px;
+        font-size: 7px;
         border-radius: 17px;
     }
 }
 
-/* =================================
-   MOBILE HERO - RECTANGLE FULL IMAGE
-   ================================= */
-
-@media (max-width: 768px) {
-
-    .hero {
-        min-height: 0;
-        height: 430px;
-
-        background-size: cover;
-        background-position: center center;
-        background-repeat: no-repeat;
-
-        display: flex;
-        align-items: center;
-    }
-
-    .hero-content {
-        width: 100%;
-        padding: 40px 28px;
-    }
-
-    .hero h1 {
-        font-size: 42px;
-        line-height: 1.12;
-        margin-bottom: 20px;
-    }
-
-    .hero p {
-        font-size: 16px;
-        line-height: 1.6;
-        margin-bottom: 28px;
-    }
-
-    .hero-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px;
-    }
-}
