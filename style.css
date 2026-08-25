@@ -46,11 +46,11 @@ button {
 
 :root {
 
-    --primary: #4e342e;
-    --primary-light: #6d4c41;
+    --primary: rgb(116, 53, 11);
+    --primary-light: wheat;
 
-    --accent: #c9a227;
-    --accent-dark: #a98516;
+    --accent:  wheat;
+    --accent-dark: rgb(116, 53, 11);
 
     --cream: #fff8e7;
     --white: #ffffff;
@@ -96,20 +96,12 @@ button {
 
     z-index: 1000;
 
-    background: rgba(255, 248, 231, 0.96);
+    background: rgba(247, 163, 99, 0.96);
 
     border-bottom: 1px solid rgba(78, 52, 46, 0.08);
 
-    transition: all 0.3s ease;
+    transition: none;
 }
-
-.header.scrolled {
-    background: var(--primary);
-
-    box-shadow:
-        0 5px 25px rgba(0, 0, 0, 0.15);
-}
-
 
 /* =========================================================
    NAV CONTAINER
@@ -168,7 +160,7 @@ button {
     font-size: 14px;
     font-weight: 500;
 
-    color: var(--primary);
+    color: wheat;
 
     transition: color 0.3s ease;
 }
@@ -184,7 +176,7 @@ button {
     width: 0;
     height: 2px;
 
-    background: var(--accent);
+    background: wheat;
 
     transition: width 0.3s ease;
 }
@@ -260,7 +252,7 @@ button {
     align-items: center;
 
     background-image:
-        url("images/hero-bg.jpg");
+        url("images/background.jpg.jpeg");
 
     background-size: cover;
     background-position: center;
@@ -292,7 +284,7 @@ button {
 
     padding-top: 70px;
 
-    color: var(--white);
+    color: var(--cream);
 }
 
 .hero-small-title {
@@ -323,7 +315,7 @@ button {
 
     margin-bottom: 32px;
 
-    color: rgba(255, 255, 255, 0.88);
+    color: var(--cream);
 
     font-size: 16px;
 }
@@ -359,12 +351,12 @@ button {
 }
 
 .btn-primary {
-    background: var(--accent);
-    color: var(--white);
+    background: wheat;
+    color: rgb(139, 60, 7);
 }
 
 .btn-primary:hover {
-    background: var(--accent-dark);
+    background: wheat;
 
     transform: translateY(-3px);
 }
@@ -1612,8 +1604,19 @@ button {
     }
 
     .logo {
-        width: 150px;
-        height: 65px;
+    width: 150px;
+    height: 67px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
     .nav-actions {
