@@ -96,7 +96,7 @@ button {
 
     z-index: 1000;
 
-    background: rgba(138, 63, 6, 0.96);
+    background: #2f211d;
 
     border-bottom: 1px solid rgba(78, 52, 46, 0.08);
 
@@ -135,14 +135,6 @@ button {
     box-shadow:
         0 4px 15px rgba(0, 0, 0, 0.08);
 }
-
-.logo img {
-    width: 100%;
-    height: 100%;
-
-    object-fit: contain;
-}
-
 
 /* =========================================================
    NAVBAR
@@ -717,7 +709,7 @@ button {
 ========================================================= */
 
 .about-section {
-    background: var(--white);
+    background: var(--cream);
 }
 
 .about-container {
@@ -738,7 +730,7 @@ button {
 }
 
 .about-image img {
-    height: 540px;
+    height: 440px;
 
     object-fit: cover;
 
@@ -764,7 +756,7 @@ button {
 
     background: var(--accent);
 
-    color: var(--white);
+    color: #2f211d;
 
     border-radius: 50%;
 
@@ -1177,7 +1169,7 @@ button {
 .footer-brand > p {
     max-width: 300px;
 
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--cream);
 
     font-size: 12px;
 }
@@ -1207,7 +1199,7 @@ button {
 
     border-radius: 50%;
 
-    color: var(--white);
+    color: wheat;
 
     font-size: 14px;
 
@@ -1215,9 +1207,9 @@ button {
 }
 
 .social-links a:hover {
-    background: var(--accent);
+    background: #2f211d;
 
-    border-color: var(--accent);
+    border-color: #2f211d;
 
     transform: translateY(-3px);
 }
@@ -1230,7 +1222,7 @@ button {
 .footer-column h3 {
     margin-bottom: 20px;
 
-    color: var(--white);
+    color: wheat;
 
     font-size: 16px;
 }
@@ -1240,7 +1232,7 @@ button {
 
     margin-bottom: 10px;
 
-    color: rgba(255, 255, 255, 0.62);
+    color: var(--cream);
 
     font-size: 12px;
 
@@ -1265,7 +1257,7 @@ button {
 
     margin-bottom: 13px;
 
-    color: rgba(255, 255, 255, 0.62);
+    color: var(--cream);
 
     font-size: 12px;
 }
@@ -1273,7 +1265,7 @@ button {
 .footer-contact i {
     width: 16px;
 
-    color: var(--accent);
+    color: var(--cream);
 }
 
 /* =========================================================
@@ -1288,9 +1280,9 @@ button {
     align-items: center;
     justify-content: space-between;
 
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--cream);
 
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--cream);
 
     font-size: 11px;
 }
@@ -1615,8 +1607,6 @@ button {
 
     overflow: hidden;
 
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
     .nav-actions {
