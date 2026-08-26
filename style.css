@@ -1629,44 +1629,52 @@ button {
     /* ---------- HERO ---------- */
 
 /* =================================
-   MOBILE HERO - RECTANGLE FULL IMAGE
+   MOBILE HERO - FULL IMAGE
    ================================= */
 
 @media (max-width: 768px) {
 
     .hero {
-        min-height: 0;
-        height: 400px;
+        width: 100%;
 
-        background-size: cover;
+        /* Image ratio 1536 : 1024 = 3 : 2 */
+        height: auto;
+        aspect-ratio: 3 / 2;
+
+        min-height: 0;
+
+        background-size: 100% 100%;
         background-position: center center;
         background-repeat: no-repeat;
 
         display: flex;
         align-items: center;
+
+        overflow: hidden;
     }
 
     .hero-content {
         width: 100%;
-        padding: 40px 28px;
+        padding: 25px 28px;
+        box-sizing: border-box;
     }
 
     .hero h1 {
-        font-size: 42px;
-        line-height: 1.12;
-        margin-bottom: 20px;
+        font-size: 32px;
+        line-height: 1.15;
+        margin-bottom: 16px;
     }
 
     .hero p {
-        font-size: 18px;
-        line-height: 1.6;
-        margin-bottom: 28px;
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 22px;
     }
 
     .hero-buttons {
         display: flex;
         flex-wrap: wrap;
-        gap: 16px;
+        gap: 12px;
     }
 }
 
