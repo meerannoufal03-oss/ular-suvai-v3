@@ -2343,8 +2343,8 @@ button {
     top: 5px;
     right: 5px;
 
-    background: #16833a;
-    color: #ffffff;
+    background: #2f211d;
+    color: var(--cream);
 
     padding: 6px 10px;
     border-radius: 20px;
