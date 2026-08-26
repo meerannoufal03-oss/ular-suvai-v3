@@ -235,10 +235,15 @@ button {
    HERO SECTION
 ========================================================= */
 
+/* =========================================================
+   HERO SECTION
+========================================================= */
+
 .hero {
     position: relative;
 
-    min-height: 720px;
+    width: 100%;
+    height: min(720px, calc(100vh - 80px));
 
     display: flex;
     align-items: center;
@@ -246,8 +251,10 @@ button {
     background-image:
         url("images/background.jpg.jpeg");
 
-    background-size: cover;
-    background-position: center;
+    /* FULL IMAGE — NO CROP */
+    background-size: 100% 100%;
+    background-position: center center;
+    background-repeat: no-repeat;
 
     overflow: hidden;
 }
@@ -1628,47 +1635,48 @@ button {
 
     /* ---------- HERO ---------- */
 
-/* =================================
-   MOBILE HERO - FULL IMAGE
-   ================================= */
+/* =========================================================
+   MOBILE HERO
+========================================================= */
 
 @media (max-width: 768px) {
 
     .hero {
         width: 100%;
 
-        /* Image ratio 1536 : 1024 = 3 : 2 */
-        height: auto;
-        aspect-ratio: 3 / 2;
+        /* Mobile window-ku automatically adjust */
+        height: min(600px, calc(100vh - 70px));
 
         min-height: 0;
 
         background-size: 100% 100%;
         background-position: center center;
         background-repeat: no-repeat;
-
-        display: flex;
-        align-items: center;
-
-        overflow: hidden;
     }
 
     .hero-content {
         width: 100%;
-        padding: 25px 28px;
+        max-width: 100%;
+
+        padding: 30px 28px;
         box-sizing: border-box;
     }
 
+    .hero-small-title {
+        font-size: 11px;
+        margin-bottom: 14px;
+    }
+
     .hero h1 {
-        font-size: 32px;
-        line-height: 1.15;
-        margin-bottom: 16px;
+        font-size: 38px;
+        line-height: 1.12;
+        margin-bottom: 18px;
     }
 
     .hero p {
         font-size: 15px;
         line-height: 1.5;
-        margin-bottom: 22px;
+        margin-bottom: 25px;
     }
 
     .hero-buttons {
@@ -1677,7 +1685,6 @@ button {
         gap: 12px;
     }
 }
-
 
     /* ---------- SECTION HEADING ---------- */
 
