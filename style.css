@@ -1632,20 +1632,16 @@ button {
         top: 68px;
     }
 
-
-    /* ---------- HERO ---------- */
-
 /* =========================================================
    MOBILE HERO
 ========================================================= */
 
-@media (max-width: 768px) {
-
     .hero {
         width: 100%;
+        height: auto;
 
-        /* Mobile window-ku automatically adjust */
-        height: min(600px, calc(100vh - 70px));
+        /* Same ratio as your original image */
+        aspect-ratio: 3 / 2;
 
         min-height: 0;
 
@@ -1657,34 +1653,27 @@ button {
     .hero-content {
         width: 100%;
         max-width: 100%;
-
-        padding: 30px 28px;
+        padding: 20px 28px;
         box-sizing: border-box;
     }
 
-    .hero-small-title {
-        font-size: 11px;
-        margin-bottom: 14px;
-    }
-
     .hero h1 {
-        font-size: 38px;
-        line-height: 1.12;
-        margin-bottom: 18px;
+        font-size: 30px;
+        line-height: 1.1;
+        margin-bottom: 12px;
     }
 
     .hero p {
-        font-size: 15px;
-        line-height: 1.5;
-        margin-bottom: 25px;
+        font-size: 14px;
+        line-height: 1.4;
+        margin-bottom: 18px;
     }
 
     .hero-buttons {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 10px;
     }
-}
 
     /* ---------- SECTION HEADING ---------- */
 
