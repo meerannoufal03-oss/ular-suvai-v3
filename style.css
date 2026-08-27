@@ -1637,45 +1637,47 @@ button {
 ========================================================= */
 
     .hero {
-    position: relative;
+        width: 100%;
 
-    width: 100%;
-    height: min(720px, calc(100vh - 80px));
+        /* Mobile window-ku automatically adjust */
+        height: min(600px, calc(100vh - 70px));
 
-    display: flex;
-    align-items: center;
+        min-height: 0;
 
-    /* FULL IMAGE — NO CROP */
-    background-size: 100% 100%;
-    background-position: center center;
-    background-repeat: no-repeat;
-
-    overflow: hidden;
+        background-size: 100% 100%;
+        background-position: center center;
+        background-repeat: no-repeat;
     }
 
     .hero-content {
         width: 100%;
         max-width: 100%;
-        padding: 20px 28px;
+
+        padding: 30px 28px;
         box-sizing: border-box;
     }
 
+    .hero-small-title {
+        font-size: 11px;
+        margin-bottom: 14px;
+    }
+
     .hero h1 {
-        font-size: 30px;
-        line-height: 1.1;
-        margin-bottom: 12px;
+        font-size: 38px;
+        line-height: 1.12;
+        margin-bottom: 18px;
     }
 
     .hero p {
-        font-size: 14px;
-        line-height: 1.4;
-        margin-bottom: 18px;
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 25px;
     }
 
     .hero-buttons {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 12px;
     }
 
     /* ---------- SECTION HEADING ---------- */
@@ -1990,47 +1992,56 @@ button {
 
     /* ---------- HERO ---------- */
 
-    .hero {
-        min-height: 560px;
+ /* =========================================================
+   MOBILE HERO
+========================================================= */
 
-        background-position: 58% center;
+@media (max-width: 768px) {
+
+    .hero {
+        width: 100%;
+
+        /* Mobile window-ku automatically adjust */
+        height: min(600px, calc(100vh - 70px));
+
+        min-height: 0;
+
+        background-size: 100% 100%;
+        background-position: center center;
+        background-repeat: no-repeat;
     }
 
     .hero-content {
-        padding-top: 45px;
+        width: 100%;
+        max-width: 100%;
+
+        padding: 30px 28px;
+        box-sizing: border-box;
     }
 
     .hero-small-title {
-        font-size: 8px;
-
-        letter-spacing: 1.2px;
+        font-size: 11px;
+        margin-bottom: 14px;
     }
 
     .hero h1 {
-        font-size: 32px;
+        font-size: 38px;
+        line-height: 1.12;
+        margin-bottom: 18px;
     }
 
     .hero p {
-        font-size: 11px;
-
-        line-height: 1.65;
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 25px;
     }
 
     .hero-buttons {
-        width: 100%;
-
-        flex-direction: column;
-
-        align-items: flex-start;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
     }
-
-    .btn {
-        width: auto;
-
-        min-height: 43px;
-
-        padding: 0 16px;
-    }
+}
 
 
     /* ---------- SECTION ---------- */
