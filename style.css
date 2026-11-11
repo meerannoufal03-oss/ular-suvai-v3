@@ -2547,3 +2547,134 @@ button {
     .dry-fish-names { grid-template-columns: 1fr; }
     .dry-fish-product-placeholder { height: 180px; }
 }
+
+
+/* =========================================================
+   MOBILE RESPONSIVE POLISH - NOV 2026
+========================================================= */
+@media (max-width: 992px) {
+    .navbar .nav-cart-link {
+        display: inline-flex;
+        width: auto;
+        min-width: 132px;
+        min-height: 40px;
+        padding: 0 16px;
+        gap: 8px;
+        border-radius: 7px;
+        background: var(--primary);
+        color: var(--white);
+        font: 600 13px "Poppins", sans-serif;
+        justify-content: center;
+    }
+    .navbar .nav-cart-link:hover {
+        background: #8d4618;
+        color: var(--white);
+    }
+    .navbar .nav-cart-link .cart-count {
+        position: static;
+        min-width: 19px;
+        height: 19px;
+        background: var(--accent);
+        color: var(--dark);
+    }
+    .nav-actions .cart-btn { display: none; }
+}
+@media (max-width: 768px) {
+    .dry-fish-names {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .dry-fish-product-card {
+        min-width: 0;
+    }
+    .dry-fish-product-card .product-image {
+        height: 145px;
+    }
+    .dry-fish-product-card .product-info {
+        min-height: 0;
+        padding: 12px;
+    }
+    .dry-fish-product-card .product-info h3 {
+        font-size: 12px;
+        overflow-wrap: anywhere;
+    }
+    .dry-fish-product-card .product-info p {
+        min-height: 30px;
+        font-size: 10px;
+        line-height: 1.45;
+    }
+    .dry-fish-product-card .add-to-cart-btn {
+        min-height: 36px;
+        margin-top: 10px;
+        font-size: 10px;
+    }
+
+    .about-image {
+        width: min(100%, 360px);
+        max-width: 360px;
+        margin: 0 auto;
+    }
+    .about-image img {
+        display: block;
+        width: 100%;
+        height: 220px;
+        object-fit: contain;
+    }
+    .about-badge {
+        right: -8px;
+        bottom: 12px;
+        width: 78px;
+        height: 78px;
+    }
+    .about-badge strong { font-size: 17px; }
+    .about-badge span { font-size: 8px; }
+
+    .footer { padding-top: 32px; }
+    .footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px 16px;
+        padding-bottom: 25px;
+    }
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+    .footer-logo {
+        width: 112px;
+        height: 60px;
+        margin-bottom: 10px;
+    }
+    .footer-brand > p {
+        max-width: 100%;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+    .social-links { gap: 8px; margin-top: 12px; }
+    .social-links a { width: 32px; height: 32px; font-size: 12px; }
+    .footer-column h3 { margin-bottom: 10px; font-size: 12px; }
+    .footer-column > a { margin-bottom: 7px; font-size: 10px; }
+    .footer-contact p { gap: 7px; margin-bottom: 8px; font-size: 9px; overflow-wrap: anywhere; }
+    .footer-contact i { width: 13px; }
+    .footer-bottom {
+        flex-direction: column;
+        gap: 5px;
+        padding: 13px 0;
+        text-align: center;
+        font-size: 8px;
+    }
+}
+@media (max-width: 480px) {
+    .dry-fish-list { padding: 18px 12px; }
+    .dry-fish-names { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .dry-fish-product-card .product-image { height: 125px; }
+    .dry-fish-product-card .product-info { padding: 10px; }
+    .dry-fish-product-card .product-info h3 { font-size: 11px; }
+    .dry-fish-product-card .product-info p { font-size: 9px; }
+    .dry-fish-product-card .add-to-cart-btn { min-height: 34px; font-size: 9px; }
+    .about-image { width: min(100%, 300px); }
+    .about-image img { height: 185px; }
+    .about-badge { width: 68px; height: 68px; right: -4px; }
+    .about-badge strong { font-size: 15px; }
+    .about-badge span { font-size: 7px; }
+    .footer-grid { gap: 18px 12px; }
+    .footer-contact p { font-size: 8px; }
+}

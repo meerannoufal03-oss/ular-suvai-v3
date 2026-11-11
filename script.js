@@ -6,18 +6,28 @@ const navbar=document.getElementById("navbar");
 const header=document.getElementById("header");
 
 if(menuToggle&&navbar){menuToggle.addEventListener("click",()=>{
-    navbar.classList.toggle("active");
+    const isOpen=navbar.classList.toggle("active");
+    menuToggle.setAttribute("aria-expanded",String(isOpen));
+    menuToggle.setAttribute("aria-label",isOpen?"Close Menu":"Open Menu");
     const icon=menuToggle.querySelector("i");
-    icon?.classList.toggle("fa-bars");
-    icon?.classList.toggle("fa-xmark");
+    if(isOpen){icon?.classList.remove("fa-bars");icon?.classList.add("fa-xmark");}
+    else{icon?.classList.add("fa-bars");icon?.classList.remove("fa-xmark");}
 });}
-document.querySelectorAll(".nav-link").forEach(link=>link.addEventListener("click",()=>{
-    navbar?.classList.remove("active");
-    const icon=menuToggle?.querySelector("i");
-    icon?.classList.add("fa-bars");icon?.classList.remove("fa-xmark");
-}));
-function updateHeader(){header?.classList.toggle("scrolled",window.scrollY>50);}
-window.addEventListener("scroll",updateHeader);updateHeader();
+document.querySelectorAll(".nav-link").forEach(link=>link.addEventListener("click",closeMobileMenu));
+function closeMobileMenu(){
+    if(!navbar||!menuToggle)return;
+    navbar.classList.remove("active");
+    menuToggle.setAttribute("aria-expanded","false");
+    menuToggle.setAttribute("aria-label","Open Menu");
+    const icon=menuToggle.querySelector("i");
+    icon?.classList.add("fa-bars");
+    icon?.classList.remove("fa-xmark");
+}
+function updateHeader(){
+    header?.classList.toggle("scrolled",window.scrollY>50);
+    if(window.innerWidth<=992&&navbar?.classList.contains("active"))closeMobileMenu();
+}
+window.addEventListener("scroll",updateHeader,{passive:true});updateHeader();
 document.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener("click",event=>{
     const selector=link.getAttribute("href");
     if(!selector||selector==="#")return;
@@ -30,8 +40,7 @@ const backToTop=document.getElementById("backToTop");
 window.addEventListener("scroll",()=>backToTop?.classList.toggle("show",window.scrollY>500));
 backToTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 window.addEventListener("resize",()=>{
-    if(window.innerWidth>992&&navbar){navbar.classList.remove("active");
-        const icon=menuToggle?.querySelector("i");icon?.classList.add("fa-bars");icon?.classList.remove("fa-xmark");}
+    if(window.innerWidth>992&&navbar)closeMobileMenu();
 });
 document.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{
     img.classList.add("image-error");img.alt="Ular Suvai Product Image";
@@ -90,7 +99,7 @@ cartItems?.addEventListener("click",event=>{
     if(action==="remove"||item.quantity<=0)cart=cart.filter(entry=>entry.id!==item.id);
     saveCart();renderCart();
 });
-cartToggle?.addEventListener("click",openCart);cartClose?.addEventListener("click",closeCart);
+cartToggle?.addEventListener("click",()=>{closeMobileMenu();openCart();});cartClose?.addEventListener("click",closeCart);
 cartOverlay?.addEventListener("click",event=>{if(event.target===cartOverlay)closeCart();});
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeCart();});
 checkoutForm?.addEventListener("submit",event=>{
