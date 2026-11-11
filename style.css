@@ -2513,3 +2513,37 @@ button {
 .checkout-success p{color:var(--light-text);font-size:12px}
 .checkout-success button{width:100%;padding:0 15px}
 @media(max-width:480px){.cart-panel{padding:20px 16px}.cart-panel-header h2{font-size:20px}.cart-line{grid-template-columns:62px 1fr auto;gap:10px}.cart-line img{width:62px;height:62px}.add-to-cart-btn{min-height:36px;font-size:10px}}
+
+
+/* Other available karuvadu product cards */
+.dry-fish-product-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 64px;
+    background: #f1eadf;
+}
+
+.dry-fish-product-card .product-info {
+    min-height: 112px;
+}
+
+.cart-line-placeholder {
+    width: 76px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    background: #f1eadf;
+    color: var(--accent);
+    font-size: 25px;
+}
+@media(max-width:768px) {
+    .dry-fish-names { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media(max-width:480px) {
+    .dry-fish-names { grid-template-columns: 1fr; }
+    .dry-fish-product-placeholder { height: 180px; }
+}
