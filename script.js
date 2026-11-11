@@ -61,7 +61,7 @@ function renderCart(){
         if(checkoutForm)checkoutForm.hidden=true;if(cartSummary)cartSummary.hidden=true;return;}
     if(checkoutForm)checkoutForm.hidden=false;if(cartSummary)cartSummary.hidden=false;
     cartItems.innerHTML=cart.map(item=>`<article class="cart-line" data-product-id="${item.id}">
-        <img src="${item.image}" alt=""><div><h4>${item.name}</h4><p>Price to be confirmed</p>
+        ${item.image ? `<img src="${item.image}" alt="">` : '<div class="cart-line-placeholder" aria-hidden="true"><i class="fa-solid fa-fish"></i></div>'}<div><h4>${item.name}</h4><p>Price to be confirmed</p>
         <div class="cart-quantity"><button type="button" data-cart-action="decrease" aria-label="Decrease quantity">−</button>
         <span>${item.quantity}</span><button type="button" data-cart-action="increase" aria-label="Increase quantity">+</button></div></div>
         <button type="button" class="cart-remove" data-cart-action="remove">Remove</button></article>`).join("");
