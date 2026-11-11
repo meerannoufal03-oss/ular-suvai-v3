@@ -59,9 +59,10 @@
             <div class="nav-actions">
 
 
-                <a href="#categories" class="nav-icon-btn cart-btn" aria-label="Products">
+                <button type="button" class="nav-icon-btn cart-btn" id="cart-toggle" aria-label="Open shopping cart">
                     <i class="fa-solid fa-basket-shopping"></i>
-                </a>
+                    <span class="cart-count" id="cart-count" aria-live="polite">0</span>
+                </button>
 
                 <!-- Mobile Menu Button -->
                 <button class="menu-toggle" id="menu-toggle" aria-label="Open Menu">
@@ -281,18 +282,6 @@
 
         ==========================================================
         -->
-
-    </main>
-
-
-    <!-- =========================
-         JAVASCRIPT
-    ========================== -->
-
-    <script src="script.js"></script>
-
-</body>
-</html>
 
 <!-- =========================
      PICKLE / OORUGAI PRODUCTS
@@ -861,90 +850,117 @@
 
 
         <!-- =========================
-             OTHER KARUVADU
-             NAME ONLY
+             OTHER AVAILABLE KARUVADU
+             CART-READY PRODUCT CARDS
         ========================== -->
 
         <div class="dry-fish-list">
-
             <div class="dry-fish-title">
-
-                <h3>
-                    Other Available Karuvadu
-                </h3>
-
-                <p>
-                    More traditional dry fish varieties available.
-                </p>
-
+                <h3>Other Available Karuvadu</h3>
+                <p>More traditional dry fish varieties available.</p>
             </div>
-
 
             <div class="dry-fish-names">
-
-
-                <div class="dry-fish-item">
-                    <span>Kooni</span>
-                    <small>Baby Shrimp / Small Shrimp</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Kooni</h3>
+                        <p>Baby Shrimp / Small Shrimp</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Paal Sura</span>
-                    <small>Milk Shark</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Paal Sura</h3>
+                        <p>Milk Shark</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Keluthu</span>
-                    <small>Catfish</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Keluthu</h3>
+                        <p>Catfish</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Maavula / Neduva</span>
-                    <small>Barracuda / Sea Pike</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Maavula / Neduva</h3>
+                        <p>Barracuda / Sea Pike</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Naakku Meen</span>
-                    <small>Sole Fish / Tongue Sole</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Naakku Meen</h3>
+                        <p>Sole Fish / Tongue Sole</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Seela / Vanjaram</span>
-                    <small>Seer Fish / King Fish</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Seela / Vanjaram</h3>
+                        <p>Seer Fish / King Fish</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Pola</span>
-                    <small>English name to be confirmed</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Pola</h3>
+                        <p>English name to be confirmed</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Panna Kuthippu</span>
-                    <small>English name to be confirmed</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Panna Kuthippu</h3>
+                        <p>English name to be confirmed</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Uluva</span>
-                    <small>Whale Shark</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Uluva</h3>
+                        <p>Whale Shark</p>
+                    </div>
                 </div>
 
-
-                <div class="dry-fish-item">
-                    <span>Parai</span>
-                    <small>Trevally / Jack Fish</small>
+                <div class="product-card dry-fish-product-card">
+                    <div class="product-image dry-fish-product-placeholder" aria-hidden="true">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="product-info">
+                        <h3>Parai</h3>
+                        <p>Trevally / Jack Fish</p>
+                    </div>
                 </div>
-
-
             </div>
-
         </div>
 
     </div>
@@ -1369,6 +1385,9 @@
 
 
 
+</main>
+
+
 <!-- =========================
      FOOTER
 ========================== -->
@@ -1554,3 +1573,40 @@
     <i class="fa-solid fa-arrow-up"></i>
 
 </button>
+
+
+<!-- DEMO SHOPPING CART AND CHECKOUT -->
+<div class="cart-overlay" id="cart-overlay" aria-hidden="true">
+    <section class="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+        <div class="cart-panel-header">
+            <div><span class="cart-eyebrow">ULAR SUVAI</span><h2 id="cart-title">Your Shopping Cart</h2></div>
+            <button type="button" class="cart-close" id="cart-close" aria-label="Close cart"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="cart-items" id="cart-items"><p class="cart-empty">Your cart is empty. Add a product to get started.</p></div>
+        <div class="cart-summary" id="cart-summary">
+            <div class="cart-summary-row"><span>Product total</span><strong>Price to be confirmed</strong></div>
+            <p>Product prices and delivery charges will be confirmed by Ular Suvai. This is a checkout preview only.</p>
+        </div>
+        <form class="checkout-form" id="checkout-form">
+            <h3>Delivery Details</h3>
+            <label for="customer-name">Full name</label>
+            <input id="customer-name" name="customerName" type="text" autocomplete="name" placeholder="Enter your name" required>
+            <label for="customer-phone">Mobile number</label>
+            <input id="customer-phone" name="customerPhone" type="tel" inputmode="numeric" autocomplete="tel" pattern="[0-9+() -]{10,15}" placeholder="Enter mobile number" required>
+            <label for="customer-address">Delivery address</label>
+            <textarea id="customer-address" name="customerAddress" rows="3" autocomplete="street-address" placeholder="House / street, area, city, PIN code" required></textarea>
+            <button type="submit" class="checkout-submit">Place Demo Order <i class="fa-solid fa-arrow-right"></i></button>
+            <p class="demo-note">Demo only — no payment will be collected and no real order will be sent.</p>
+        </form>
+        <div class="checkout-success" id="checkout-success" role="status" hidden>
+            <i class="fa-solid fa-circle-check"></i><h3>Demo order created!</h3>
+            <p id="success-message">Your checkout preview is complete. No real order or payment was made.</p>
+            <button type="button" id="continue-shopping">Continue Shopping</button>
+        </div>
+    </section>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

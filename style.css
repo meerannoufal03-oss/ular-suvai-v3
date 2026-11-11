@@ -2475,3 +2475,75 @@ button {
     }
 }
 
+
+
+/* E-COMMERCE CART + DEMO CHECKOUT */
+.cart-btn{position:relative;border:0;cursor:pointer;font:inherit}
+.cart-count{position:absolute;top:-7px;right:-7px;min-width:19px;height:19px;padding:0 5px;display:grid;place-items:center;border-radius:50px;background:#b9472f;color:#fff;font-size:10px;font-weight:700}
+.add-to-cart-btn{width:100%;min-height:40px;margin-top:14px;border:0;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:var(--white);font:600 12px "Poppins",sans-serif;cursor:pointer;transition:.25s ease}
+.add-to-cart-btn:hover{background:#8d4618;transform:translateY(-2px)}
+.cart-overlay{position:fixed;inset:0;z-index:3000;display:none;justify-content:flex-end;background:rgba(25,18,13,.58)}
+.cart-overlay.is-open{display:flex}
+.cart-panel{width:min(100%,510px);height:100%;overflow-y:auto;padding:26px;background:var(--cream);box-shadow:-12px 0 35px rgba(0,0,0,.18)}
+.cart-panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.cart-eyebrow{color:var(--primary);font-size:10px;font-weight:700;letter-spacing:2px}
+.cart-panel-header h2{margin-top:4px;color:var(--dark);font-size:23px}
+.cart-close{width:38px;height:38px;border:1px solid var(--border);border-radius:50%;background:#fff;color:var(--primary);font-size:18px;cursor:pointer}
+.cart-empty{padding:28px 8px;color:var(--light-text);text-align:center}
+.cart-line{display:grid;grid-template-columns:76px 1fr auto;gap:13px;align-items:center;padding:17px 0;border-bottom:1px solid var(--border)}
+.cart-line img{width:76px;height:76px;border-radius:9px;object-fit:cover;background:#eee4d5}
+.cart-line h4{margin-bottom:3px;color:var(--dark);font-size:13px}
+.cart-line p{color:var(--light-text);font-size:11px}
+.cart-quantity{display:flex;align-items:center;gap:8px;margin-top:8px}
+.cart-quantity button{width:25px;height:25px;border:1px solid var(--border);border-radius:5px;background:#fff;color:var(--primary);cursor:pointer}
+.cart-quantity span{min-width:15px;text-align:center;font-size:12px;font-weight:600}
+.cart-remove{border:0;background:transparent;color:#a43d2d;font-size:11px;cursor:pointer}
+.cart-summary{margin-top:18px;padding:15px;border-radius:9px;background:#f2e7d4}
+.cart-summary-row{display:flex;justify-content:space-between;gap:12px;color:var(--dark);font-size:12px}
+.cart-summary p,.demo-note{margin-top:9px;color:var(--light-text);font-size:10px;line-height:1.6}
+.checkout-form{display:grid;gap:9px;margin-top:24px}
+.checkout-form h3{margin-bottom:5px;color:var(--primary);font-size:18px}
+.checkout-form label{margin-top:5px;color:var(--dark);font-size:12px;font-weight:600}
+.checkout-form input,.checkout-form textarea{width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:7px;outline:none;background:#fff;color:var(--dark);font:12px "Poppins",sans-serif}
+.checkout-form input:focus,.checkout-form textarea:focus{border-color:var(--primary)}
+.checkout-submit,.checkout-success button{min-height:46px;margin-top:9px;border:0;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:9px;background:var(--primary);color:#fff;font:600 13px "Poppins",sans-serif;cursor:pointer}
+.checkout-success{padding:35px 12px;text-align:center}
+.checkout-success>i{color:#36804c;font-size:42px}
+.checkout-success h3{margin:12px 0 7px;color:var(--primary)}
+.checkout-success p{color:var(--light-text);font-size:12px}
+.checkout-success button{width:100%;padding:0 15px}
+@media(max-width:480px){.cart-panel{padding:20px 16px}.cart-panel-header h2{font-size:20px}.cart-line{grid-template-columns:62px 1fr auto;gap:10px}.cart-line img{width:62px;height:62px}.add-to-cart-btn{min-height:36px;font-size:10px}}
+
+
+/* Other available karuvadu product cards */
+.dry-fish-product-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 64px;
+    background: #f1eadf;
+}
+
+.dry-fish-product-card .product-info {
+    min-height: 112px;
+}
+
+.cart-line-placeholder {
+    width: 76px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    background: #f1eadf;
+    color: var(--accent);
+    font-size: 25px;
+}
+@media(max-width:768px) {
+    .dry-fish-names { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media(max-width:480px) {
+    .dry-fish-names { grid-template-columns: 1fr; }
+    .dry-fish-product-placeholder { height: 180px; }
+}

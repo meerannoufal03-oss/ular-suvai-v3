@@ -1,674 +1,108 @@
-// =========================================================
-// ULAR SUVAI
-// JAVASCRIPT - PART 6
-// =========================================================
+// ULAR SUVAI - NAVIGATION, CART AND DEMO CHECKOUT
+// Demo only: no real payment or order submission is connected.
 
+const menuToggle=document.getElementById("menu-toggle");
+const navbar=document.getElementById("navbar");
+const header=document.getElementById("header");
 
-// =========================================================
-// MOBILE NAVIGATION
-// =========================================================
+if(menuToggle&&navbar){menuToggle.addEventListener("click",()=>{
+    navbar.classList.toggle("active");
+    const icon=menuToggle.querySelector("i");
+    icon?.classList.toggle("fa-bars");
+    icon?.classList.toggle("fa-xmark");
+});}
+document.querySelectorAll(".nav-link").forEach(link=>link.addEventListener("click",()=>{
+    navbar?.classList.remove("active");
+    const icon=menuToggle?.querySelector("i");
+    icon?.classList.add("fa-bars");icon?.classList.remove("fa-xmark");
+}));
+function updateHeader(){header?.classList.toggle("scrolled",window.scrollY>50);}
+window.addEventListener("scroll",updateHeader);updateHeader();
+document.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener("click",event=>{
+    const selector=link.getAttribute("href");
+    if(!selector||selector==="#")return;
+    const target=document.querySelector(selector);if(!target)return;
+    event.preventDefault();
+    const top=target.getBoundingClientRect().top+window.scrollY-(header?.offsetHeight||0);
+    window.scrollTo({top,behavior:"smooth"});
+}));
+const backToTop=document.getElementById("backToTop");
+window.addEventListener("scroll",()=>backToTop?.classList.toggle("show",window.scrollY>500));
+backToTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+window.addEventListener("resize",()=>{
+    if(window.innerWidth>992&&navbar){navbar.classList.remove("active");
+        const icon=menuToggle?.querySelector("i");icon?.classList.add("fa-bars");icon?.classList.remove("fa-xmark");}
+});
+document.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{
+    img.classList.add("image-error");img.alt="Ular Suvai Product Image";
+}));
 
-const menuToggle = document.getElementById("menu-toggle");
-const navbar = document.getElementById("navbar");
+const STORAGE_KEY="ularSuvaiDemoCart";
+let cart=[];
+try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(Array.isArray(saved))cart=saved;}catch(error){cart=[];}
+const cartToggle=document.getElementById("cart-toggle");
+const cartOverlay=document.getElementById("cart-overlay");
+const cartClose=document.getElementById("cart-close");
+const cartItems=document.getElementById("cart-items");
+const cartCount=document.getElementById("cart-count");
+const checkoutForm=document.getElementById("checkout-form");
+const checkoutSuccess=document.getElementById("checkout-success");
+const continueShopping=document.getElementById("continue-shopping");
+const cartSummary=document.getElementById("cart-summary");
 
-if (menuToggle && navbar) {
-
-    menuToggle.addEventListener("click", () => {
-
-        navbar.classList.toggle("active");
-
-        const icon = menuToggle.querySelector("i");
-
-        if (navbar.classList.contains("active")) {
-
-            icon.classList.remove("fa-bars");
-            icon.classList.add("fa-xmark");
-
-        } else {
-
-            icon.classList.remove("fa-xmark");
-            icon.classList.add("fa-bars");
-
-        }
-
-    });
-
+function saveCart(){localStorage.setItem(STORAGE_KEY,JSON.stringify(cart));}
+function openCart(){cartOverlay?.classList.add("is-open");cartOverlay?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
+function closeCart(){cartOverlay?.classList.remove("is-open");cartOverlay?.setAttribute("aria-hidden","true");document.body.style.overflow="";}
+function updateCartCount(){const count=cart.reduce((sum,item)=>sum+item.quantity,0);if(cartCount)cartCount.textContent=String(count);}
+function renderCart(){
+    if(!cartItems)return;
+    updateCartCount();
+    if(cart.length===0){cartItems.innerHTML='<p class="cart-empty">Your cart is empty. Add a product to get started.</p>';
+        if(checkoutForm)checkoutForm.hidden=true;if(cartSummary)cartSummary.hidden=true;return;}
+    if(checkoutForm)checkoutForm.hidden=false;if(cartSummary)cartSummary.hidden=false;
+    cartItems.innerHTML=cart.map(item=>`<article class="cart-line" data-product-id="${item.id}">
+        ${item.image ? `<img src="${item.image}" alt="">` : '<div class="cart-line-placeholder" aria-hidden="true"><i class="fa-solid fa-fish"></i></div>'}<div><h4>${item.name}</h4><p>Price to be confirmed</p>
+        <div class="cart-quantity"><button type="button" data-cart-action="decrease" aria-label="Decrease quantity">−</button>
+        <span>${item.quantity}</span><button type="button" data-cart-action="increase" aria-label="Increase quantity">+</button></div></div>
+        <button type="button" class="cart-remove" data-cart-action="remove">Remove</button></article>`).join("");
 }
-
-
-// =========================================================
-// CLOSE MOBILE MENU WHEN CLICKING NAV LINK
-// =========================================================
-
-const navLinks = document.querySelectorAll(".nav-link");
-
-navLinks.forEach((link) => {
-
-    link.addEventListener("click", () => {
-
-        if (navbar) {
-            navbar.classList.remove("active");
-        }
-
-        if (menuToggle) {
-
-            const icon = menuToggle.querySelector("i");
-
-            icon.classList.remove("fa-xmark");
-            icon.classList.add("fa-bars");
-
-        }
-
-    });
-
-});
-
-
-// =========================================================
-// HEADER SCROLL EFFECT
-// =========================================================
-
-const header = document.getElementById("header");
-
-function updateHeader() {
-
-    if (!header) return;
-
-    if (window.scrollY > 50) {
-
-        header.classList.add("scrolled");
-
-    } else {
-
-        header.classList.remove("scrolled");
-
-    }
-
+function addToCart(card){
+    const name=card.querySelector("h3")?.textContent.trim();if(!name)return;
+    const description=card.querySelector(".product-info p")?.textContent.trim()||"";
+    const image=card.querySelector(".product-image img")?.getAttribute("src")||"";
+    const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+    const existing=cart.find(item=>item.id===id);
+    if(existing)existing.quantity+=1;else cart.push({id,name,description,image,quantity:1});
+    saveCart();renderCart();openCart();
 }
-
-window.addEventListener("scroll", updateHeader);
-
-updateHeader();
-
-
-// =========================================================
-// ACTIVE NAVIGATION LINK
-// =========================================================
-
-const sections = document.querySelectorAll("section[id]");
-
-function updateActiveLink() {
-
-    const scrollPosition = window.scrollY + 150;
-
-    sections.forEach((section) => {
-
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-        const sectionId = section.getAttribute("id");
-
-        if (
-            scrollPosition >= sectionTop &&
-            scrollPosition < sectionTop + sectionHeight
-        ) {
-
-            navLinks.forEach((link) => {
-
-                link.classList.remove("active");
-
-                if (
-                    link.getAttribute("href") ===
-                    "#" + sectionId
-                ) {
-
-                    link.classList.add("active");
-
-                }
-
-            });
-
-        }
-
-    });
-
-}
-
-window.addEventListener("scroll", updateActiveLink);
-
-
-// =========================================================
-// BACK TO TOP BUTTON
-// =========================================================
-
-const backToTop = document.getElementById("backToTop");
-
-function updateBackToTop() {
-
-    if (!backToTop) return;
-
-    if (window.scrollY > 500) {
-
-        backToTop.classList.add("show");
-
-    } else {
-
-        backToTop.classList.remove("show");
-
-    }
-
-}
-
-window.addEventListener("scroll", updateBackToTop);
-
-
-if (backToTop) {
-
-    backToTop.addEventListener("click", () => {
-
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-
-    });
-
-}
-
-
-// =========================================================
-// SMOOTH SCROLL FOR INTERNAL LINKS
-// =========================================================
-
-const internalLinks = document.querySelectorAll(
-    'a[href^="#"]'
-);
-
-internalLinks.forEach((link) => {
-
-    link.addEventListener("click", function (event) {
-
-        const targetId = this.getAttribute("href");
-
-        if (
-            targetId === "#" ||
-            !targetId
-        ) {
-            return;
-        }
-
-        const target = document.querySelector(targetId);
-
-        if (!target) {
-            return;
-        }
-
-        event.preventDefault();
-
-        const headerHeight = header
-            ? header.offsetHeight
-            : 0;
-
-        const targetPosition =
-            target.getBoundingClientRect().top +
-            window.scrollY -
-            headerHeight;
-
-        window.scrollTo({
-
-            top: targetPosition,
-
-            behavior: "smooth"
-
-        });
-
-    });
-
+document.querySelectorAll(".product-card").forEach(card=>{
+    const info=card.querySelector(".product-info");if(!info||info.querySelector(".add-to-cart-btn"))return;
+    const button=document.createElement("button");button.type="button";button.className="add-to-cart-btn";
+    button.innerHTML='<i class="fa-solid fa-cart-plus"></i> Add to Cart';
+    button.addEventListener("click",()=>addToCart(card));info.appendChild(button);
 });
-
-
-// =========================================================
-// PREVENT EMPTY SOCIAL LINKS FROM JUMPING
-// =========================================================
-
-const emptyLinks = document.querySelectorAll(
-    'a[href="#"]'
-);
-
-emptyLinks.forEach((link) => {
-
-    link.addEventListener("click", (event) => {
-
-        event.preventDefault();
-
-    });
-
+cartItems?.addEventListener("click",event=>{
+    const button=event.target.closest("[data-cart-action]");if(!button)return;
+    const line=button.closest("[data-product-id]");const item=cart.find(entry=>entry.id===line?.dataset.productId);if(!item)return;
+    const action=button.dataset.cartAction;
+    if(action==="increase")item.quantity+=1;
+    if(action==="decrease")item.quantity-=1;
+    if(action==="remove"||item.quantity<=0)cart=cart.filter(entry=>entry.id!==item.id);
+    saveCart();renderCart();
 });
-
-
-// =========================================================
-// WINDOW RESIZE
-// =========================================================
-
-window.addEventListener("resize", () => {
-
-    if (
-        window.innerWidth > 992 &&
-        navbar
-    ) {
-
-        navbar.classList.remove("active");
-
-        if (menuToggle) {
-
-            const icon =
-                menuToggle.querySelector("i");
-
-            icon.classList.remove("fa-xmark");
-            icon.classList.add("fa-bars");
-
-        }
-
-    }
-
+cartToggle?.addEventListener("click",openCart);cartClose?.addEventListener("click",closeCart);
+cartOverlay?.addEventListener("click",event=>{if(event.target===cartOverlay)closeCart();});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")closeCart();});
+checkoutForm?.addEventListener("submit",event=>{
+    event.preventDefault();if(cart.length===0||!checkoutForm.reportValidity())return;
+    const name=document.getElementById("customer-name").value.trim();
+    const count=cart.reduce((sum,item)=>sum+item.quantity,0);
+    checkoutForm.hidden=true;if(cartSummary)cartSummary.hidden=true;cartItems.hidden=true;checkoutSuccess.hidden=false;
+    document.getElementById("success-message").textContent=`Thank you, ${name}. Your demo checkout includes ${count} item(s). No real order was sent and no payment was collected.`;
+    cart=[];saveCart();updateCartCount();
 });
-
-// =========================================================
-// ULAR SUVAI
-// SEARCH + PRODUCT INTERACTION - PART 7
-// ========================================================
-
-
-// =========================================================
-// PRODUCT CARD CLICK
-// =========================================================
-
-productCards.forEach((card) => {
-
-    card.addEventListener("click", () => {
-
-        const productName =
-            card.querySelector("h3")
-                ?.textContent
-                .trim();
-
-
-        if (!productName) {
-            return;
-        }
-
-
-        // -----------------------------------------------
-        // CHANGE THIS NUMBER TO YOUR ACTUAL WHATSAPP NO.
-        // -----------------------------------------------
-
-        const whatsappNumber =
-            "919XXXXXXXXX";
-
-
-        const message =
-            `Hi Ular Suvai, I am interested in ${productName}. Please share the price and details.`;
-
-
-        const whatsappURL =
-            `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-
-
-        window.open(
-            whatsappURL,
-            "_blank"
-        );
-
-    });
-
+continueShopping?.addEventListener("click",()=>{
+    checkoutSuccess.hidden=true;cartItems.hidden=false;checkoutForm.reset();renderCart();closeCart();
 });
-
-
-// =========================================================
-// PRODUCT CARD KEYBOARD ACCESSIBILITY
-// =========================================================
-
-productCards.forEach((card) => {
-
-    card.setAttribute(
-        "role",
-        "button"
-    );
-
-    card.setAttribute(
-        "tabindex",
-        "0"
-    );
-
-
-    card.addEventListener(
-        "keydown",
-        (event) => {
-
-            if (
-                event.key === "Enter" ||
-                event.key === " "
-            ) {
-
-                event.preventDefault();
-
-                card.click();
-
-            }
-
-        }
-    );
-
-});
-
-// =========================================================
-// ULAR SUVAI
-// FINAL CONNECTION - PART 9
-// =========================================================
-
-
-// =========================================================
-// WHATSAPP NUMBER
-// =========================================================
-
-// IMPORTANT:
-// 91 + mobile number மட்டும்.
-// + symbol, spaces use panna vendam.
-
-const ULAR_SUVAI_WHATSAPP = "919XXXXXXXXX";
-
-
-// =========================================================
-// OPEN WHATSAPP ORDER
-// =========================================================
-
-function orderOnWhatsApp(productName) {
-
-    if (!productName) return;
-
-    const message =
-        `Hi Ular Suvai 👋\n\n` +
-        `I am interested in: ${productName}\n\n` +
-        `Please share the price and availability.`;
-
-    const whatsappURL =
-        `https://wa.me/${ULAR_SUVAI_WHATSAPP}?text=${encodeURIComponent(message)}`;
-
-    window.open(
-        whatsappURL,
-        "_blank"
-    );
-}
-
-
-// =========================================================
-// HERO WHATSAPP BUTTON
-// =========================================================
-
-const whatsappButtons =
-    document.querySelectorAll(
-        ".whatsapp-button, .hero .btn-outline"
-    );
-
-whatsappButtons.forEach((button) => {
-
-    button.addEventListener("click", (event) => {
-
-        const href =
-            button.getAttribute("href");
-
-        // If button already has a real WhatsApp link,
-        // don't override it.
-        if (
-            href &&
-            href.includes("wa.me")
-        ) {
-            return;
-        }
-
-        event.preventDefault();
-
-        orderOnWhatsApp(
-            "Ular Suvai Products"
-        );
-
-    });
-
-});
-
-
-// =========================================================
-// PRODUCT CARDS
-// =========================================================
-
-const allProductCards =
-    document.querySelectorAll(
-        ".product-card"
-    );
-
-allProductCards.forEach((card) => {
-
-    const productNameElement =
-        card.querySelector("h3");
-
-    if (!productNameElement) return;
-
-    const productName =
-        productNameElement.textContent.trim();
-
-
-    // Remove old click listener issue
-    // by adding a separate order button.
-
-    let orderButton =
-        card.querySelector(".product-order-btn");
-
-
-    if (!orderButton) {
-
-        orderButton =
-            document.createElement("button");
-
-        orderButton.className =
-            "product-order-btn";
-
-        orderButton.innerHTML =
-            `<i class="fa-brands fa-whatsapp"></i>
-             Order`;
-
-        const productInfo =
-            card.querySelector(".product-info");
-
-        if (productInfo) {
-
-            productInfo.appendChild(
-                orderButton
-            );
-
-        }
-
-    }
-
-
-    orderButton.addEventListener(
-        "click",
-        (event) => {
-
-            event.stopPropagation();
-
-            orderOnWhatsApp(
-                productName
-            );
-
-        }
-    );
-
-});
-
-
-// =========================================================
-// CATEGORY LINKS
-// =========================================================
-
-const categoryLinks =
-    document.querySelectorAll(
-        ".category-link"
-    );
-
-categoryLinks.forEach((link) => {
-
-    link.addEventListener(
-        "click",
-        (event) => {
-
-            const targetId =
-                link.getAttribute("href");
-
-            if (
-                !targetId ||
-                targetId === "#"
-            ) {
-                return;
-            }
-
-            const target =
-                document.querySelector(
-                    targetId
-                );
-
-            if (!target) return;
-
-            event.preventDefault();
-
-            const headerHeight =
-                header
-                    ? header.offsetHeight
-                    : 0;
-
-            const targetPosition =
-                target.offsetTop -
-                headerHeight;
-
-            window.scrollTo({
-
-                top: targetPosition,
-
-                behavior: "smooth"
-
-            });
-
-        }
-    );
-
-});
-
-
-// =========================================================
-// IMAGE ERROR FALLBACK
-// =========================================================
-
-const allImages =
-    document.querySelectorAll(
-        "img"
-    );
-
-allImages.forEach((image) => {
-
-    image.addEventListener(
-        "error",
-        () => {
-
-            image.classList.add(
-                "image-error"
-            );
-
-            image.alt =
-                "Ular Suvai Product Image";
-
-        }
-    );
-
-});
-
-
-// =========================================================
-// MOBILE MENU - CLOSE AFTER RESIZE
-// =========================================================
-
-window.addEventListener(
-    "resize",
-    () => {
-
-        if (
-            window.innerWidth > 992 &&
-            navbar
-        ) {
-
-            navbar.classList.remove(
-                "active"
-            );
-
-            if (menuToggle) {
-
-                const icon =
-                    menuToggle.querySelector(
-                        "i"
-                    );
-
-                if (icon) {
-
-                    icon.classList.remove(
-                        "fa-xmark"
-                    );
-
-                    icon.classList.add(
-                        "fa-bars"
-                    );
-
-                }
-
-            }
-
-        }
-
-    }
-);
-
-
-// =========================================================
-// PREVENT FORM SUBMIT RELOAD
-// =========================================================
-
-const forms =
-    document.querySelectorAll(
-        "form"
-    );
-
-forms.forEach((form) => {
-
-    form.addEventListener(
-        "submit",
-        (event) => {
-
-            event.preventDefault();
-
-        }
-    );
-
-});
-
-
-// =========================================================
-// PAGE LOADED
-// =========================================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        console.log(
-            "Ular Suvai website loaded successfully."
-        );
-
-    }
-);
-
+renderCart();
+console.log("Ular Suvai demo cart loaded.");
