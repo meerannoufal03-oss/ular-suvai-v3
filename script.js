@@ -33,16 +33,15 @@ checkoutForm?.addEventListener("submit",async e=>{
  e.preventDefault();
  if(!cart.length||!checkoutForm.reportValidity())return;
  const button=document.getElementById("razorpay-pay-button");
- const paymentMethod=checkoutForm.querySelector('input[name="paymentMethod"]:checked')?.value;
- if(!paymentMethod){alert("Please select a payment method.");return;}
+
  const items=cart.map(item=>({name:item.name,quantity:item.quantity,category:item.category}));
  const customer={name:customerName.value.trim(),countryCode:document.getElementById("country-code").value,phone:customerPhone.value,address:document.getElementById("customer-address").value.trim()};
  const original=button.innerHTML;button.disabled=true;button.textContent="Connecting to Razorpay...";
  try {
-  const response=await fetch(PAYMENT_API_BASE+"/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items,customer,paymentMethod})});
+  const response=await fetch(PAYMENT_API_BASE+"/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items,customer})});
   const order=await response.json();if(!response.ok)throw new Error(order.error||"Could not create Razorpay order.");
   if(!window.Razorpay)throw new Error("Razorpay Checkout did not load. Refresh and try again.");
-  const checkout=new window.Razorpay({key:order.keyId,amount:order.amount,currency:order.currency,name:"Ular Suvai",description:"Ular Suvai Test Order",order_id:order.orderId,prefill:{name:customer.name,contact:customer.phone},notes:{selected_payment_method:paymentMethod},theme:{color:"#74350b"},
+  const checkout=new window.Razorpay({key:order.keyId,amount:order.amount,currency:order.currency,name:"Ular Suvai",description:"Ular Suvai Test Order",order_id:order.orderId,prefill:{name:customer.name,contact:customer.phone},theme:{color:"#74350b"},
    handler:async result=>{
     try{
      const verify=await fetch(PAYMENT_API_BASE+"/api/verify-payment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(result)});
