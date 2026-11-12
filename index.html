@@ -1611,16 +1611,15 @@
             <label for="customer-address">Delivery address</label>
             <textarea id="customer-address" name="customerAddress" rows="3" autocomplete="street-address" placeholder="House / street, area, city, PIN code" required></textarea>
             <fieldset class="payment-methods">
-                <legend>Payment method (demo selection)</legend>
+                <legend>Razorpay payment method</legend>
                 <label><input type="radio" name="paymentMethod" value="UPI" required> UPI (Google Pay / PhonePe / Paytm)</label>
                 <label><input type="radio" name="paymentMethod" value="Debit / Credit Card"> Debit / Credit Card</label>
                 <label><input type="radio" name="paymentMethod" value="Net Banking"> Net Banking</label>
                 <label><input type="radio" name="paymentMethod" value="Wallet"> Wallet</label>
                 <label><input type="radio" name="paymentMethod" value="Cash on Delivery"> Cash on Delivery</label>
-                <p class="demo-note">Demo selection only. No payment gateway is connected and no money will be collected.</p>
-            </fieldset>
-            <button type="submit" class="checkout-submit">Place Demo Order <i class="fa-solid fa-arrow-right"></i></button>
-            <p class="demo-note">Demo only — no real order will be sent.</p></form>
+                <p class="demo-note">Razorpay Test Mode checkout. No real money will be collected.</p>
+            </fieldset>            <button type="submit" class="checkout-submit" id="razorpay-pay-button">Pay with Razorpay <i class="fa-solid fa-lock"></i></button>
+            <p class="demo-note">Test Mode only — transactions are simulated. No real money will be collected.</p></form>
         </div>
         <div class="checkout-success" id="checkout-success" role="status" hidden>
             <i class="fa-solid fa-circle-check"></i><h3>Demo order created!</h3>
@@ -1630,6 +1629,7 @@
     </section>
 </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="script.js"></script>
 
 </body>
