@@ -2700,3 +2700,17 @@ button {
 .payment-methods .demo-note { margin:2px 0 0; }
 .sample-price { margin-top:6px; color:var(--primary); font-size:11px; font-weight:700; }
 .cart-line .cart-item-price { margin-top:3px; color:var(--primary); font-size:11px; font-weight:700; }
+
+
+/* Two-step cart flow */
+[hidden] { display:none !important; }
+.cart-step,.checkout-step { width:100%; }
+.checkout-next-btn,.back-to-cart-btn { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:14px 18px; margin:16px 0 8px; border:0; border-radius:9px; background:var(--primary); color:#fff; font:600 14px "Poppins",sans-serif; cursor:pointer; }
+.checkout-next-btn:disabled { opacity:.45; cursor:not-allowed; }
+.back-to-cart-btn { justify-content:flex-start; width:auto; margin:0 0 18px; padding:9px 0; background:transparent; color:var(--primary); }
+.checkout-step { max-height:calc(100vh - 105px); overflow-y:auto; padding-right:2px; }
+.cart-step .cart-items { max-height:48vh; overflow-y:auto; }
+.cart-step .cart-summary { position:static; margin-top:12px; }
+.cart-step .cart-summary-row { font-size:17px; }
+.cart-panel { overflow:hidden; }
+@media(max-width:600px) { .cart-step .cart-items { max-height:42vh; } .checkout-step { max-height:calc(100vh - 90px); } .checkout-next-btn { font-size:13px; } }
