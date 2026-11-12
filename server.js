@@ -50,11 +50,12 @@ function sendError(res, error) {
   });
 }
 
+// Amounts are INR paise per 500g pack and must match the website display.
 const SAMPLE_PRICES = Object.freeze({
-  pickles: 15000,       // ₹150.00 in paise
-  "palm-products": 8000, // ₹80.00
-  uppukandam: 22000,    // ₹220.00
-  karuvadu: 12000       // ₹120.00
+  pickles: 15000,        // ₹150 / 500g
+  "palm-products": 8000, // ₹80 / 500g
+  uppukandam: 22000,     // ₹220 / 500g
+  karuvadu: 12000        // ₹120 / 500g
 });
 
 const CATALOG = Object.freeze({
