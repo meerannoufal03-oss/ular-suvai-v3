@@ -109,11 +109,24 @@ app.post("/api/verify-payment", async (req, res) => {
     if (!KEY_SECRET || a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
       return res.status(400).json({ verified: false, error: "Payment signature verification failed." });
     }
-    const payment = await getRazorpay().payments.fetch(razorpay_payment_id);
-    if (payment.order_id !== razorpay_order_id || !["authorized", "captured"].includes(payment.status)) {
-      return res.status(400).json({ verified: false, error: "Payment is not in a valid state." });
+    const razorpay = getRazorpay();
+    const [payment, order] = await Promise.all([
+      razorpay.payments.fetch(razorpay_payment_id),
+      razorpay.orders.fetch(razorpay_order_id)
+    ]);
+    if (
+      payment.order_id !== razorpay_order_id ||
+      payment.currency !== order.currency ||
+      payment.amount !== order.amount ||
+      payment.status !== "captured" ||
+      payment.amount_captured !== order.amount
+    ) {
+      return res.status(409).json({
+        verified: false,
+        error: "Payment is not captured or its amount does not match the Razorpay order. Check auto-capture settings and try again."
+      });
     }
-    res.json({ verified: true, paymentId: payment.id, status: payment.status });
+    res.json({ verified: true, paymentId: payment.id, status: payment.status, amount: payment.amount, currency: payment.currency });
   } catch (error) {
     sendError(res, error);
   }
