@@ -1610,15 +1610,11 @@
             <input id="customer-phone" name="customerPhone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" minlength="10" pattern="[0-9]{10}" placeholder="Enter 10-digit mobile number" required>
             <label for="customer-address">Delivery address</label>
             <textarea id="customer-address" name="customerAddress" rows="3" autocomplete="street-address" placeholder="House / street, area, city, PIN code" required></textarea>
-            <fieldset class="payment-methods">
-                <legend>Razorpay payment method</legend>
-                <label><input type="radio" name="paymentMethod" value="UPI" required> UPI (Google Pay / PhonePe / Paytm)</label>
-                <label><input type="radio" name="paymentMethod" value="Debit / Credit Card"> Debit / Credit Card</label>
-                <label><input type="radio" name="paymentMethod" value="Net Banking"> Net Banking</label>
-                <label><input type="radio" name="paymentMethod" value="Wallet"> Wallet</label>
-                <label><input type="radio" name="paymentMethod" value="Cash on Delivery"> Cash on Delivery</label>
-                <p class="demo-note">Razorpay Test Mode checkout. No real money will be collected.</p>
-            </fieldset>            <button type="submit" class="checkout-submit" id="razorpay-pay-button">Pay with Razorpay <i class="fa-solid fa-lock"></i></button>
+            <div class="payment-methods-info">
+                <h4>Payment options in Razorpay</h4>
+                <p>Choose from UPI, Debit / Credit Cards, Net Banking and Wallets in the secure Razorpay checkout window. Available options depend on the methods enabled for this Test Mode account.</p>
+                <p class="demo-note">Razorpay Test Mode only. Transactions are simulated; no real money will be collected.</p>
+            </div> </fieldset>            <button type="submit" class="checkout-submit" id="razorpay-pay-button">Pay with Razorpay <i class="fa-solid fa-lock"></i></button>
             <p class="demo-note">Test Mode only — transactions are simulated. No real money will be collected.</p></form>
         </div>
         <div class="checkout-success" id="checkout-success" role="status" hidden>
