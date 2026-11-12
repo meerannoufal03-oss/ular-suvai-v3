@@ -1574,18 +1574,29 @@
 
 
 <!-- DEMO SHOPPING CART AND CHECKOUT -->
+<!-- Temporary category-wise demo prices only: Pickles ₹150; Palm Products ₹80; Uppukandam ₹220; Karuvadu ₹120. Update when official prices are confirmed. -->
+
 <div class="cart-overlay" id="cart-overlay" aria-hidden="true">
     <section class="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">
         <div class="cart-panel-header">
             <div><span class="cart-eyebrow">ULAR SUVAI</span><h2 id="cart-title">Your Shopping Cart</h2></div>
             <button type="button" class="cart-close" id="cart-close" aria-label="Close cart"><i class="fa-solid fa-xmark"></i></button>
         </div>
+        <div class="cart-step" id="cart-step">
         <div class="cart-items" id="cart-items"><p class="cart-empty">Your cart is empty. Add a product to get started.</p></div>
         <div class="cart-summary" id="cart-summary">
             <div class="cart-summary-row"><span>Sample product total</span><strong id="cart-total">₹0.00</strong></div>
             <p>Temporary demo sample price: ₹100 per product unit. Official prices can be updated later. Delivery charges are not included.</p>
         </div>
-        <form class="checkout-form" id="checkout-form">
+            <div class="cart-summary" id="cart-summary">
+                <div class="cart-summary-row"><span>Cart total</span><strong id="cart-total">₹0.00</strong></div>
+                <p>Demo sample prices only. Final product prices will be updated later. Delivery charges are not included.</p>
+            </div>
+            <button type="button" class="checkout-next-btn" id="checkout-next" disabled>Continue to Delivery Details <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+        <div class="checkout-step" id="checkout-step" hidden>
+            <button type="button" class="back-to-cart-btn" id="back-to-cart"><i class="fa-solid fa-arrow-left"></i> Back to Cart</button>
+<form class="checkout-form" id="checkout-form">
             <h3>Delivery Details</h3>
             <label for="customer-name">Full name</label>
             <input id="customer-name" name="customerName" type="text" autocomplete="name" placeholder="Enter your name" pattern="[A-Za-z]+(?: [A-Za-z]+)*" title="English letters only; spaces between names are allowed." required>
@@ -1613,8 +1624,8 @@
                 <p class="demo-note">Demo selection only. No payment gateway is connected and no money will be collected.</p>
             </fieldset>
             <button type="submit" class="checkout-submit">Place Demo Order <i class="fa-solid fa-arrow-right"></i></button>
-            <p class="demo-note">Demo only — no real order will be sent.</p>
-        </form> </form>
+            <p class="demo-note">Demo only — no real order will be sent.</p></form>
+        </div>
         <div class="checkout-success" id="checkout-success" role="status" hidden>
             <i class="fa-solid fa-circle-check"></i><h3>Demo order created!</h3>
             <p id="success-message">Your checkout preview is complete. No real order or payment was made.</p>
