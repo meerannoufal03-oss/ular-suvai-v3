@@ -247,7 +247,9 @@ app.post("/api/verify-payment", async (req, res) => {
       order.currency !== pendingOrder.currency ||
       payment.amount !== pendingOrder.amount ||
       order.amount !== pendingOrder.amount ||
-      payment.amount_captured !== pendingOrder.amount ||
+      // Razorpay's Payment entity confirms capture via captured + status.
+      // Do not require amount_captured: it is not part of the documented
+      // captured Payment entity response; exact amount is checked above.
       payment.captured !== true ||
       payment.status !== "captured" ||
       order.status !== "paid"
@@ -256,10 +258,13 @@ app.post("/api/verify-payment", async (req, res) => {
         paymentStatus: payment.status,
         captured: payment.captured,
         paymentAmount: payment.amount,
-        capturedAmount: payment.amount_captured,
         orderStatus: order.status,
         orderAmount: order.amount,
-        expectedAmount: pendingOrder.amount
+        expectedAmount: pendingOrder.amount,
+        orderIdMatches: payment.order_id === razorpay_order_id,
+        paymentCurrency: payment.currency,
+        orderCurrency: order.currency,
+        expectedCurrency: pendingOrder.currency
       }));
       return res.status(409).json({
         verified: false,
