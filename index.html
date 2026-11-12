@@ -41,11 +41,6 @@
                     Home
                 </a>
 
-                <button type="button" class="nav-icon-btn cart-btn nav-cart-link" id="cart-toggle" aria-label="Open shopping cart">
-                    <i class="fa-solid fa-basket-shopping"></i>
-                    <span class="cart-count" id="cart-count" aria-live="polite">0</span>
-                </button>
-
                 <a href="#categories" class="nav-link">
                     Products
                 </a>
@@ -63,9 +58,13 @@
             <!-- Right Side Icons -->
             <div class="nav-actions">
 
-                <!-- Mobile Menu Button -->
-                <button class="menu-toggle" id="menu-toggle" aria-label="Open Menu">
+                <!-- Menu button is left of the separate top-right cart icon -->
+                <button class="menu-toggle" id="menu-toggle" aria-label="Open Menu" aria-expanded="false">
                     <i class="fa-solid fa-bars"></i>
+                </button>
+                <button type="button" class="nav-icon-btn cart-btn header-cart-btn" id="cart-toggle" aria-label="Open shopping cart">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span class="cart-count" id="cart-count" aria-live="polite">0</span>
                 </button>
 
             </div>
@@ -1583,20 +1582,39 @@
         </div>
         <div class="cart-items" id="cart-items"><p class="cart-empty">Your cart is empty. Add a product to get started.</p></div>
         <div class="cart-summary" id="cart-summary">
-            <div class="cart-summary-row"><span>Product total</span><strong>Price to be confirmed</strong></div>
-            <p>Product prices and delivery charges will be confirmed by Ular Suvai. This is a checkout preview only.</p>
+            <div class="cart-summary-row"><span>Sample product total</span><strong id="cart-total">₹0.00</strong></div>
+            <p>Temporary demo sample price: ₹100 per product unit. Official prices can be updated later. Delivery charges are not included.</p>
         </div>
         <form class="checkout-form" id="checkout-form">
             <h3>Delivery Details</h3>
             <label for="customer-name">Full name</label>
-            <input id="customer-name" name="customerName" type="text" autocomplete="name" placeholder="Enter your name" required>
-            <label for="customer-phone">Mobile number</label>
-            <input id="customer-phone" name="customerPhone" type="tel" inputmode="numeric" autocomplete="tel" pattern="[0-9+() -]{10,15}" placeholder="Enter mobile number" required>
+            <input id="customer-name" name="customerName" type="text" autocomplete="name" placeholder="Enter your name" pattern="[A-Za-z]+(?: [A-Za-z]+)*" title="English letters only; spaces between names are allowed." required>
+            <label for="country-code">Country code</label>
+            <select id="country-code" name="countryCode" autocomplete="tel-country-code" required>
+                <option value="+91" selected>India (+91)</option><option value="+1">United States / Canada (+1)</option>
+                <option value="+44">United Kingdom (+44)</option><option value="+971">UAE (+971)</option>
+                <option value="+966">Saudi Arabia (+966)</option><option value="+974">Qatar (+974)</option>
+                <option value="+965">Kuwait (+965)</option><option value="+968">Oman (+968)</option>
+                <option value="+973">Bahrain (+973)</option><option value="+94">Sri Lanka (+94)</option>
+                <option value="+60">Malaysia (+60)</option><option value="+65">Singapore (+65)</option>
+                <option value="+61">Australia (+61)</option>
+            </select>
+            <label for="customer-phone">10-digit mobile number</label>
+            <input id="customer-phone" name="customerPhone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" minlength="10" pattern="[0-9]{10}" placeholder="Enter 10-digit mobile number" required>
             <label for="customer-address">Delivery address</label>
             <textarea id="customer-address" name="customerAddress" rows="3" autocomplete="street-address" placeholder="House / street, area, city, PIN code" required></textarea>
+            <fieldset class="payment-methods">
+                <legend>Payment method (demo selection)</legend>
+                <label><input type="radio" name="paymentMethod" value="UPI" required> UPI (Google Pay / PhonePe / Paytm)</label>
+                <label><input type="radio" name="paymentMethod" value="Debit / Credit Card"> Debit / Credit Card</label>
+                <label><input type="radio" name="paymentMethod" value="Net Banking"> Net Banking</label>
+                <label><input type="radio" name="paymentMethod" value="Wallet"> Wallet</label>
+                <label><input type="radio" name="paymentMethod" value="Cash on Delivery"> Cash on Delivery</label>
+                <p class="demo-note">Demo selection only. No payment gateway is connected and no money will be collected.</p>
+            </fieldset>
             <button type="submit" class="checkout-submit">Place Demo Order <i class="fa-solid fa-arrow-right"></i></button>
-            <p class="demo-note">Demo only — no payment will be collected and no real order will be sent.</p>
-        </form>
+            <p class="demo-note">Demo only — no real order will be sent.</p>
+        </form> </form>
         <div class="checkout-success" id="checkout-success" role="status" hidden>
             <i class="fa-solid fa-circle-check"></i><h3>Demo order created!</h3>
             <p id="success-message">Your checkout preview is complete. No real order or payment was made.</p>
