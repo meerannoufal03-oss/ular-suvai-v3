@@ -1,7 +1,7 @@
 // ULAR SUVAI - NAVIGATION, CART AND TWO-STEP DEMO CHECKOUT
 // Temporary category-wise sample prices only. Replace with approved prices later.
 const CATEGORY_SAMPLE_PRICES={pickles:150,"palm-products":80,uppukandam:220,karuvadu:120};
-const PAYMENT_API_BASE=window.ULAR_SUVAI_PAYMENT_API || "https://YOUR-ULAR-SUVAI-RAZORPAY-API.onrender.com";
+const PAYMENT_API_BASE=window.ULAR_SUVAI_PAYMENT_API || "https://ular-suvai-razorpay-test-api.onrender.com";
 const STORAGE_KEY="ularSuvaiDemoCart";
 function samplePriceFor(card){const section=card.closest("section[id]");return CATEGORY_SAMPLE_PRICES[section?.id]??100;}
 const menuToggle=document.getElementById("menu-toggle"),navbar=document.getElementById("navbar"),header=document.getElementById("header");
