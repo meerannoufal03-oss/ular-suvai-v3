@@ -121,7 +121,8 @@ app.post("/api/create-order", async (req, res) => {
     if (!Array.isArray(items) || items.length < 1 || items.length > 40) {
       return res.status(400).json({ error: "Cart items are invalid." });
     }
-    if (!customer || !/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(String(customer.name || ""))) {
+    const customerName = String(customer?.name || "").trim().replace(/\s+/g, " ");
+    if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(customerName)) {
       return res.status(400).json({ error: "Enter a valid name using English letters only." });
     }
     if (!ALLOWED_COUNTRY_CODES.has(customer.countryCode) || !/^\d{10}$/.test(String(customer.phone || ""))) {
@@ -153,7 +154,7 @@ app.post("/api/create-order", async (req, res) => {
       currency: "INR",
       receipt: `us_${Date.now()}`,
       notes: {
-        customer_name: String(customer.name).slice(0, 100),
+        customer_name: customerName.slice(0, 100),
         customer_phone: `${customer.countryCode}${customer.phone}`,
         sample_pricing: "true",
         item_count: String(normalized.reduce((sum, item) => sum + item.quantity, 0)),
