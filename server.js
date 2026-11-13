@@ -72,8 +72,13 @@ const CATALOG = Object.freeze({
   ])
 });
 
-// Empty until inventory is physically confirmed. Add exact "category:Product Name" entries to enable sales.
-const AVAILABLE_PRODUCTS = new Set([]);
+// INVENTORY CONTROL
+// All catalogue products are available by default.
+// Add exact "category:Product Name" values here to block ordering while stock is unavailable.
+// Examples: "pickles:Chicken Oorugai", "karuvadu:Sala", "palm-products:Karupatti".
+const OUT_OF_STOCK_PRODUCTS = new Set([
+  // "pickles:Chicken Oorugai",
+]);
 
 const ALLOWED_COUNTRY_CODES = new Set([
   "+91", "+1", "+44", "+971", "+966", "+974", "+965",
@@ -143,7 +148,7 @@ app.post("/api/create-order", async (req, res) => {
       if (!CATALOG[category]?.has(name) || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) {
         throw Object.assign(new Error("Cart contains an invalid product or quantity."), { status: 400 });
       }
-      if (!AVAILABLE_PRODUCTS.has(`${category}:${name}`)) {
+      if (OUT_OF_STOCK_PRODUCTS.has(`${category}:${name}`)) {
         throw Object.assign(new Error("One or more products are currently out of stock."), { status: 409 });
       }
       return { category, name, quantity, unitAmount: SAMPLE_PRICES[category] };
