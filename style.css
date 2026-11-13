@@ -3696,3 +3696,102 @@ body { overflow-x: hidden; background: var(--cream); }
     padding: 9px 12px 10px;
   }
 }
+
+
+/* Final mobile correction: hero should occupy about half of the visible phone screen. */
+@media (max-width: 600px) {
+  .hero {
+    height: auto !important;
+    min-height: clamp(350px, 50svh, 450px) !important;
+    padding-block: 24px !important;
+    background-size: cover;
+    background-position: center center;
+  }
+  .hero-container {
+    min-height: 0 !important;
+    height: auto;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero-content {
+    max-width: 520px;
+    padding: 0;
+    margin: 0 auto;
+  }
+  .hero-small-title {
+    margin-bottom: 10px;
+    font-size: 10px;
+    letter-spacing: 1.2px;
+  }
+  .hero h1 {
+    margin-bottom: 12px;
+    font-size: clamp(29px, 7.6vw, 38px);
+    line-height: 1.1;
+  }
+  .hero p {
+    margin: 0 auto 18px;
+    max-width: 420px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .hero-buttons {
+    gap: 9px;
+  }
+  .hero-buttons .btn {
+    min-height: 42px;
+    padding-inline: 13px;
+    font-size: 11px;
+  }
+}
+
+/* Product photos: fill their compact frame with the subject centred.
+   This keeps jars and dry fish clear instead of leaving letterbox space. */
+.product-image {
+  aspect-ratio: 1.3 / 1 !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+  object-position: 50% 50% !important;
+  transform: none;
+}
+.product-card:hover .product-image img {
+  transform: scale(1.015);
+}
+
+/* Karuvadu photos use the exact same centered crop as pickle photos. */
+.karuvadu-grid .product-image {
+  aspect-ratio: 1.3 / 1 !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+.karuvadu-grid .product-image img {
+  object-fit: cover !important;
+  object-position: center center !important;
+  transform: none;
+}
+.karuvadu-grid .product-card:hover .product-image img {
+  transform: scale(1.015);
+}
+
+@media (max-width: 600px) {
+  .product-grid,
+  .karuvadu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px 10px;
+  }
+  .product-image,
+  .karuvadu-grid .product-image {
+    aspect-ratio: 1.3 / 1 !important;
+    padding: 0 !important;
+  }
+  .product-image img,
+  .karuvadu-grid .product-image img {
+    object-position: center center !important;
+  }
+}
