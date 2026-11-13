@@ -7,18 +7,22 @@ const CATEGORY_SAMPLE_PACKS={
  karuvadu:{price:120,weight:"500g"}
 };
 const PAYMENT_API_BASE=window.ULAR_SUVAI_PAYMENT_API || "https://ular-suvai-razorpay-test-api.onrender.com";
-// INVENTORY CONTROL
-// By default every catalogue product is available and can be added to cart.
-// To temporarily disable one product, add its exact "category:Product Name" below.
-// Examples: "pickles:Chicken Oorugai", "karuvadu:Sala", "palm-products:Karupatti".
-const OUT_OF_STOCK_PRODUCTS = new Set([
-  // Add only unavailable items here. Examples:
-  // "pickles:Chicken Oorugai",
-  // "karuvadu:Sala",
-  // "palm-products:Karupatti",
-]);
+// Product stock is maintained by the owner in inventory.json.
+// Only GitHub repository collaborators can edit this file; customers cannot change stock.
+let INVENTORY_PRODUCTS = Object.create(null);
+let INVENTORY_READY = false;
+async function loadInventory() {
+  const inventoryUrl = new URL("./inventory.json", window.location.href);
+  inventoryUrl.searchParams.set("_", String(Date.now()));
+  const response = await fetch(inventoryUrl.toString(), { cache: "no-store" });
+  if (!response.ok) throw new Error("Could not load product stock settings.");
+  const data = await response.json();
+  if (!data || !data.products || typeof data.products !== "object") throw new Error("Product stock settings are invalid.");
+  INVENTORY_PRODUCTS = data.products;
+  INVENTORY_READY = true;
+}
 function isProductInStock(category, name) {
-  return !OUT_OF_STOCK_PRODUCTS.has(`${category}:${name}`);
+  return INVENTORY_READY && INVENTORY_PRODUCTS[category + ":" + name] === true;
 }
 const STORAGE_KEY="ularSuvaiCartNov2026"; // new stock-aware cart version; old demo cart is intentionally not carried forward
 function samplePackFor(card){const section=card.closest("section[id]");return CATEGORY_SAMPLE_PACKS[section?.id]||{price:100,weight:"500g"};}
@@ -32,7 +36,6 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener("click",
 const backToTop=document.getElementById("backToTop");window.addEventListener("scroll",()=>backToTop?.classList.toggle("show",window.scrollY>500));backToTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));window.addEventListener("resize",()=>{if(window.innerWidth>992)closeMobileMenu();});
 document.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{img.classList.add("image-error");img.alt="Ular Suvai Product Image";}));
 let cart=[];try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(Array.isArray(data))cart=data.filter(x=>x&&x.id&&x.name).map(x=>{const card=[...document.querySelectorAll(".product-card")].find(c=>c.querySelector("h3")?.textContent.trim()===x.name);const category=card?.closest("section[id]")?.id||x.category||"pickles";const pack=CATEGORY_SAMPLE_PACKS[category]||{price:Number(x.price)||100,weight:x.weight||"500g"};return {...x,quantity:Math.max(1,Number(x.quantity)||1),price:pack.price,weight:pack.weight,category};});}catch(e){cart=[];}
-cart = cart.filter(item => isProductInStock(item.category || "pickles", item.name));
 const cartToggle=document.getElementById("cart-toggle"),cartOverlay=document.getElementById("cart-overlay"),cartClose=document.getElementById("cart-close"),cartItems=document.getElementById("cart-items"),cartCount=document.getElementById("cart-count"),checkoutForm=document.getElementById("checkout-form"),checkoutSuccess=document.getElementById("checkout-success"),continueShopping=document.getElementById("continue-shopping"),cartSummary=document.getElementById("cart-summary"),cartTotal=document.getElementById("cart-total"),cartStep=document.getElementById("cart-step"),checkoutStep=document.getElementById("checkout-step"),checkoutNext=document.getElementById("checkout-next"),backToCart=document.getElementById("back-to-cart");
 function saveCart(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(cart));}catch(e){console.warn("Could not save cart",e);}}
 function openCart(){cartOverlay?.classList.add("is-open");cartOverlay?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
@@ -56,6 +59,7 @@ function addToCart(card){
  saveCart();showCartStep();renderCart();openCart();
 }
 
+function renderProductCards() {
 document.querySelectorAll(".product-card").forEach(card=>{
  const info=card.querySelector(".product-info"),heading=info?.querySelector("h3");
  if(!info||!heading)return;
@@ -95,6 +99,8 @@ document.querySelectorAll(".product-card").forEach(card=>{
    button.onclick=null;
  }
 });
+}
+
 cartItems?.addEventListener("click",e=>{const b=e.target.closest("[data-cart-action]");if(!b)return;const line=b.closest("[data-product-id]"),item=cart.find(x=>x.id===line?.dataset.productId);if(!item)return;if(b.dataset.cartAction==="increase")item.quantity++;if(b.dataset.cartAction==="decrease")item.quantity--;if(b.dataset.cartAction==="remove"||item.quantity<=0)cart=cart.filter(x=>x.id!==item.id);saveCart();renderCart();});
 cartToggle?.addEventListener("click",()=>{closeMobileMenu();showCartStep();renderCart();openCart();});cartClose?.addEventListener("click",closeCart);cartOverlay?.addEventListener("click",e=>{if(e.target===cartOverlay)closeCart();});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCart();});
 checkoutNext?.addEventListener("click",showCheckoutStep);backToCart?.addEventListener("click",()=>{showCartStep();renderCart();});
@@ -139,4 +145,28 @@ checkoutForm?.addEventListener("submit",async e=>{
  }catch(error){alert(error.message);button.disabled=false;button.innerHTML=original;}
 });
 continueShopping?.addEventListener("click",()=>{checkoutForm.reset();showCartStep();renderCart();closeCart();});
-renderCart();showCartStep();console.log("Ular Suvai two-step demo cart loaded with category sample prices.");
+async function initialiseStorefront() {
+ try {
+  await loadInventory();
+  cart = cart.filter(item => isProductInStock(item.category || "pickles", item.name));
+  saveCart();
+  renderProductCards();
+ } catch (error) {
+  INVENTORY_READY = false;
+  console.error("Inventory unavailable. Add to Cart is disabled until stock settings load.", error);
+  document.querySelectorAll(".product-card").forEach(card => {
+   const info=card.querySelector(".product-info"); if(!info)return;
+   card.dataset.stock="out-of-stock";
+   let badge=info.querySelector(".stock-badge");
+   if(!badge){badge=document.createElement("span");badge.className="stock-badge";info.appendChild(badge);}
+   badge.textContent="Stock unavailable";
+   let button=info.querySelector(".add-to-cart-btn");
+   if(!button){button=document.createElement("button");button.type="button";button.className="add-to-cart-btn";info.appendChild(button);}
+   button.disabled=true;button.textContent="Unavailable";
+  });
+ }
+ renderCart();
+ showCartStep();
+ console.log("Ular Suvai storefront initialised with owner-managed inventory.");
+}
+initialiseStorefront();
