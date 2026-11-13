@@ -12,7 +12,10 @@ const PAYMENT_API_BASE=window.ULAR_SUVAI_PAYMENT_API || "https://ular-suvai-razo
 // To temporarily disable one product, add its exact "category:Product Name" below.
 // Examples: "pickles:Chicken Oorugai", "karuvadu:Sala", "palm-products:Karupatti".
 const OUT_OF_STOCK_PRODUCTS = new Set([
+  // Add only unavailable items here. Examples:
   // "pickles:Chicken Oorugai",
+  // "karuvadu:Sala",
+  // "palm-products:Karupatti",
 ]);
 function isProductInStock(category, name) {
   return !OUT_OF_STOCK_PRODUCTS.has(`${category}:${name}`);
@@ -29,6 +32,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener("click",
 const backToTop=document.getElementById("backToTop");window.addEventListener("scroll",()=>backToTop?.classList.toggle("show",window.scrollY>500));backToTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));window.addEventListener("resize",()=>{if(window.innerWidth>992)closeMobileMenu();});
 document.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{img.classList.add("image-error");img.alt="Ular Suvai Product Image";}));
 let cart=[];try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(Array.isArray(data))cart=data.filter(x=>x&&x.id&&x.name).map(x=>{const card=[...document.querySelectorAll(".product-card")].find(c=>c.querySelector("h3")?.textContent.trim()===x.name);const category=card?.closest("section[id]")?.id||x.category||"pickles";const pack=CATEGORY_SAMPLE_PACKS[category]||{price:Number(x.price)||100,weight:x.weight||"500g"};return {...x,quantity:Math.max(1,Number(x.quantity)||1),price:pack.price,weight:pack.weight,category};});}catch(e){cart=[];}
+cart = cart.filter(item => isProductInStock(item.category || "pickles", item.name));
 const cartToggle=document.getElementById("cart-toggle"),cartOverlay=document.getElementById("cart-overlay"),cartClose=document.getElementById("cart-close"),cartItems=document.getElementById("cart-items"),cartCount=document.getElementById("cart-count"),checkoutForm=document.getElementById("checkout-form"),checkoutSuccess=document.getElementById("checkout-success"),continueShopping=document.getElementById("continue-shopping"),cartSummary=document.getElementById("cart-summary"),cartTotal=document.getElementById("cart-total"),cartStep=document.getElementById("cart-step"),checkoutStep=document.getElementById("checkout-step"),checkoutNext=document.getElementById("checkout-next"),backToCart=document.getElementById("back-to-cart");
 function saveCart(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(cart));}catch(e){console.warn("Could not save cart",e);}}
 function openCart(){cartOverlay?.classList.add("is-open");cartOverlay?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
@@ -55,26 +59,40 @@ function addToCart(card){
 document.querySelectorAll(".product-card").forEach(card=>{
  const info=card.querySelector(".product-info"),heading=info?.querySelector("h3");
  if(!info||!heading)return;
- const name=heading.textContent.trim(),category=card.closest("section[id]")?.id||"pickles",inStock=isProductInStock(category,name);
+ const name=heading.textContent.trim();
+ const category=card.closest("section[id]")?.id||"pickles";
+ const inStock=isProductInStock(category,name);
+ const pack=samplePackFor(card);
  const image=card.querySelector(".product-image");
- let badge=image?.querySelector(".stock-badge");
- if(!badge&&image){badge=document.createElement("span");badge.className="stock-badge";image.appendChild(badge);}
- if(badge){badge.textContent=inStock?"In Stock":"Out of Stock";badge.classList.toggle("is-in-stock",inStock);}
+
+ let meta=info.querySelector(".product-meta");
+ if(!meta){meta=document.createElement("div");meta.className="product-meta";info.appendChild(meta);}
+ let price=meta.querySelector(".sample-price");
+ if(!price){price=document.createElement("p");price.className="sample-price";meta.appendChild(price);}
+ price.textContent="₹"+pack.price+" / "+pack.weight;
+
+ let badge=info.querySelector(".stock-badge")||image?.querySelector(".stock-badge");
+ if(!badge){badge=document.createElement("span");badge.className="stock-badge"; }
+ badge.textContent=inStock?"In Stock":"Out of Stock";
+ badge.classList.toggle("is-in-stock",inStock);
+ badge.classList.toggle("is-out-of-stock",!inStock);
+ meta.appendChild(badge);
  card.dataset.stock=inStock?"in-stock":"out-of-stock";
+
  let button=info.querySelector(".add-to-cart-btn");
  if(!button){button=document.createElement("button");button.type="button";button.className="add-to-cart-btn";info.appendChild(button);}
- if(!inStock){
-   button.disabled=true;button.setAttribute("aria-disabled","true");button.title="This product is currently unavailable";
-   button.innerHTML='<i class="fa-solid fa-ban" aria-hidden="true"></i> Out of Stock';
-   info.querySelector(".sample-price")?.remove();
- }else{
-   button.disabled=false;button.removeAttribute("aria-disabled");button.title="Add product to cart";
+ if(inStock){
+   button.disabled=false;
+   button.removeAttribute("aria-disabled");
+   button.title="Add product to cart";
    button.innerHTML='<i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Add to Cart';
-   button.addEventListener("click",()=>addToCart(card));
-   const pack=samplePackFor(card);
-   let label=info.querySelector(".sample-price");
-   if(!label){label=document.createElement("p");label.className="sample-price";info.appendChild(label);}
-   label.textContent="Price: ₹"+pack.price+" / "+pack.weight;
+   button.onclick=()=>addToCart(card);
+ }else{
+   button.disabled=true;
+   button.setAttribute("aria-disabled","true");
+   button.title="This product is currently unavailable";
+   button.innerHTML='<i class="fa-solid fa-ban" aria-hidden="true"></i> Out of Stock';
+   button.onclick=null;
  }
 });
 cartItems?.addEventListener("click",e=>{const b=e.target.closest("[data-cart-action]");if(!b)return;const line=b.closest("[data-product-id]"),item=cart.find(x=>x.id===line?.dataset.productId);if(!item)return;if(b.dataset.cartAction==="increase")item.quantity++;if(b.dataset.cartAction==="decrease")item.quantity--;if(b.dataset.cartAction==="remove"||item.quantity<=0)cart=cart.filter(x=>x.id!==item.id);saveCart();renderCart();});
@@ -93,12 +111,12 @@ checkoutForm?.addEventListener("submit",async e=>{
  e.preventDefault();
  if(!cart.length||!checkoutForm.reportValidity())return;
  const button=document.getElementById("razorpay-pay-button");
-
+ const original=button.innerHTML;
  const items=cart.map(item=>({name:item.name,quantity:item.quantity,category:item.category}));
  const addressParts = ["customer-house","customer-street","customer-area","customer-city","customer-pincode"].map(id=>document.getElementById(id)?.value.trim()||"");
-  if(addressParts.some(part=>!part)){alert("Please complete all delivery address fields.");button.disabled=false;button.innerHTML=original;return;}
-  const customer={name:customerName.value.trim(),countryCode:document.getElementById("country-code").value,phone:customerPhone.value,address:addressParts.join(", ")};
- const original=button.innerHTML;button.disabled=true;button.textContent="Connecting to Razorpay...";
+ if(addressParts.some(part=>!part)){alert("Please complete all delivery address fields.");return;}
+ const customer={name:customerName.value.trim(),countryCode:document.getElementById("country-code").value,phone:customerPhone.value,address:addressParts.join(", ")};
+ button.disabled=true;button.textContent="Connecting to Razorpay...";
  try {
   const response=await fetch(PAYMENT_API_BASE+"/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items,customer})});
   const order=await response.json();if(!response.ok)throw new Error(order.error||"Could not create Razorpay order.");
