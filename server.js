@@ -178,6 +178,10 @@ app.post("/api/create-order", async (req, res) => {
       amount,
       currency: "INR",
       receipt: `us_${Date.now()}`,
+      // Ask Razorpay to capture the payment automatically for this order.
+      // The verification route below also safely captures an authorized payment
+      // if account-level settings or a delayed authorization leave it uncaptured.
+      payment: { capture: "automatic" },
       notes: {
         customer_name: customerName.slice(0, 100),
         customer_phone: `${customer.countryCode}${customer.phone}`,
@@ -227,24 +231,69 @@ app.post("/api/verify-payment", async (req, res) => {
     }
 
     const razorpay = getRazorpay();
-    const [payment, order] = await Promise.all([
-      razorpay.payments.fetch(razorpay_payment_id),
-      razorpay.orders.fetch(razorpay_order_id)
-    ]);
+    let payment = await razorpay.payments.fetch(razorpay_payment_id);
+    const originalOrder = await razorpay.orders.fetch(razorpay_order_id);
 
+    // Validate identity and the full authorized amount before attempting capture.
+    if (
+      payment.order_id !== razorpay_order_id ||
+      payment.currency !== pendingOrder.currency ||
+      originalOrder.currency !== pendingOrder.currency ||
+      payment.amount !== pendingOrder.amount ||
+      originalOrder.amount !== pendingOrder.amount
+    ) {
+      return res.status(409).json({
+        verified: false,
+        error: "Payment amount or order details do not match. Please create a new checkout order."
+      });
+    }
+
+    // Checkout can report an authorization before Razorpay has captured it.
+    // Capture only after signature, order ID, currency and exact amount checks pass.
+    if (payment.status === "authorized") {
+      try {
+        payment = await razorpay.payments.capture(
+          razorpay_payment_id,
+          pendingOrder.amount,
+          pendingOrder.currency
+        );
+      } catch (captureError) {
+        // Auto-capture may complete between our fetch and capture request.
+        // Re-fetch once and accept only an actually captured payment.
+        payment = await razorpay.payments.fetch(razorpay_payment_id);
+        if (payment.status !== "captured") throw captureError;
+      }
+    }
+
+    const order = await razorpay.orders.fetch(razorpay_order_id);
     if (
       payment.order_id !== razorpay_order_id ||
       payment.currency !== pendingOrder.currency ||
       order.currency !== pendingOrder.currency ||
       payment.amount !== pendingOrder.amount ||
       order.amount !== pendingOrder.amount ||
-      payment.amount_captured !== pendingOrder.amount ||
+      // Razorpay's Payment entity confirms capture via captured + status.
+      // Do not require amount_captured: it is not part of the documented
+      // captured Payment entity response; exact amount is checked above.
+      payment.captured !== true ||
       payment.status !== "captured" ||
       order.status !== "paid"
     ) {
+      console.warn("Razorpay verification pending:", JSON.stringify({
+        paymentStatus: payment.status,
+        captured: payment.captured,
+        paymentAmount: payment.amount,
+        orderStatus: order.status,
+        orderAmount: order.amount,
+        expectedAmount: pendingOrder.amount,
+        orderIdMatches: payment.order_id === razorpay_order_id,
+        paymentCurrency: payment.currency,
+        orderCurrency: order.currency,
+        expectedCurrency: pendingOrder.currency
+      }));
       return res.status(409).json({
         verified: false,
-        error: "Payment is not captured or its amount does not match the Razorpay order. Check Test Mode payment capture settings and try again."
+        error: "Razorpay has not confirmed a fully captured payment for this exact order amount. Please check the Razorpay payment status before retrying."
       });
     }
 
