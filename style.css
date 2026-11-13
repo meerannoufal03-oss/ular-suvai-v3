@@ -3123,3 +3123,84 @@ body { overflow-x: hidden; background: var(--cream); }
 @media(prefers-reduced-motion:reduce) {
   *, *::before, *::after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; }
 }
+
+
+/* About section: circular logo lockup */
+.about-logo-badge {
+  width: 144px;
+  height: 144px;
+  top: 22px;
+  right: 22px;
+  bottom: auto;
+  padding: 13px 10px 11px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  overflow: hidden;
+  border: 3px solid rgba(255,255,255,.96);
+  border-radius: 50%;
+  background: #fff8e9;
+  color: #71340f;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(0,0,0,.22);
+}
+.about-logo-badge img {
+  display: block;
+  width: 77px;
+  height: 67px;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+}
+.about-logo-badge strong {
+  display: block;
+  margin: 0;
+  color: #71340f;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 1.1px;
+}
+.about-logo-badge span {
+  display: block;
+  margin: 0;
+  color: #94602f;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 1.8px;
+}
+.stock-badge.is-in-stock {
+  background: #2f7048;
+  color: #fff;
+}
+.stock-badge:not(.is-in-stock) {
+  background: #873b2a;
+  color: #fff;
+}
+@media(max-width:600px) {
+  .about-logo-badge {
+    top: 12px;
+    right: 12px;
+    width: 106px;
+    height: 106px;
+    padding: 8px 7px;
+    border-width: 2px;
+    gap: 2px;
+  }
+  .about-logo-badge img {
+    width: 54px;
+    height: 48px;
+  }
+  .about-logo-badge strong {
+    font-size: 8px;
+    letter-spacing: .7px;
+  }
+  .about-logo-badge span {
+    font-size: 7px;
+    letter-spacing: 1.2px;
+  }
+}

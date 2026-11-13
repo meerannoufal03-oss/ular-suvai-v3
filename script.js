@@ -7,8 +7,16 @@ const CATEGORY_SAMPLE_PACKS={
  karuvadu:{price:120,weight:"500g"}
 };
 const PAYMENT_API_BASE=window.ULAR_SUVAI_PAYMENT_API || "https://ular-suvai-razorpay-test-api.onrender.com";
-// Keep this list empty while every product is out of stock. Add exact product names only after physical stock is confirmed.
-const IN_STOCK_PRODUCTS = new Set([]);
+// INVENTORY CONTROL
+// By default every catalogue product is available and can be added to cart.
+// To temporarily disable one product, add its exact "category:Product Name" below.
+// Examples: "pickles:Chicken Oorugai", "karuvadu:Sala", "palm-products:Karupatti".
+const OUT_OF_STOCK_PRODUCTS = new Set([
+  // "pickles:Chicken Oorugai",
+]);
+function isProductInStock(category, name) {
+  return !OUT_OF_STOCK_PRODUCTS.has(`${category}:${name}`);
+}
 const STORAGE_KEY="ularSuvaiCartNov2026"; // new stock-aware cart version; old demo cart is intentionally not carried forward
 function samplePackFor(card){const section=card.closest("section[id]");return CATEGORY_SAMPLE_PACKS[section?.id]||{price:100,weight:"500g"};}
 const menuToggle=document.getElementById("menu-toggle"),navbar=document.getElementById("navbar"),header=document.getElementById("header");
@@ -31,11 +39,13 @@ function updateCount(){if(cartCount)cartCount.textContent=String(cart.reduce((n,
 function renderCart(){if(!cartItems)return;updateCount();const total=cart.reduce((n,x)=>n+x.price*x.quantity,0);if(cartTotal)cartTotal.textContent="₹"+total.toFixed(2);if(checkoutNext)checkoutNext.disabled=!cart.length;if(!cart.length){cartItems.innerHTML='<p class="cart-empty">Your cart is empty. Add a product to get started.</p>';if(cartSummary)cartSummary.hidden=true;return;}if(cartSummary)cartSummary.hidden=false;cartItems.innerHTML=cart.map(x=>`<article class="cart-line" data-product-id="${x.id}">${x.image?`<img src="${x.image}" alt="">`:'<div class="cart-line-placeholder"><i class="fa-solid fa-fish"></i></div>'}<div><h4>${x.name}</h4><p>${x.description||""}</p><p class="cart-item-price">Price: ₹${x.price} / ${x.weight||"500g"}</p><div class="cart-quantity"><button type="button" data-cart-action="decrease" aria-label="Decrease quantity">−</button><span>${x.quantity}</span><button type="button" data-cart-action="increase" aria-label="Increase quantity">+</button></div></div><button type="button" class="cart-remove" data-cart-action="remove">Remove</button></article>`).join("");}
 function addToCart(card){
  const name=card.querySelector("h3")?.textContent.trim();
- if(!name||!IN_STOCK_PRODUCTS.has(name))return;
+ if(!name)return;
+ const category=card.closest("section[id]")?.id||"pickles";
+ if(!isProductInStock(category,name))return;
  const description=card.querySelector(".product-info p")?.textContent.trim()||"";
  const image=card.querySelector(".product-image img")?.getAttribute("src")||"";
  const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-");
- const pack=samplePackFor(card),category=card.closest("section[id]")?.id||"pickles";
+ const pack=samplePackFor(card);
  const existing=cart.find(x=>x.id===id);
  if(existing){existing.quantity++;existing.price=pack.price;existing.weight=pack.weight;existing.category=category;}
  else cart.push({id,name,description,image,quantity:1,price:pack.price,weight:pack.weight,category});
@@ -45,7 +55,7 @@ function addToCart(card){
 document.querySelectorAll(".product-card").forEach(card=>{
  const info=card.querySelector(".product-info"),heading=info?.querySelector("h3");
  if(!info||!heading)return;
- const name=heading.textContent.trim(),inStock=IN_STOCK_PRODUCTS.has(name);
+ const name=heading.textContent.trim(),category=card.closest("section[id]")?.id||"pickles",inStock=isProductInStock(category,name);
  const image=card.querySelector(".product-image");
  let badge=image?.querySelector(".stock-badge");
  if(!badge&&image){badge=document.createElement("span");badge.className="stock-badge";image.appendChild(badge);}
