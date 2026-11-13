@@ -7,7 +7,9 @@ const CATEGORY_SAMPLE_PACKS={
  karuvadu:{price:120,weight:"500g"}
 };
 const PAYMENT_API_BASE=window.ULAR_SUVAI_PAYMENT_API || "https://ular-suvai-razorpay-test-api.onrender.com";
-const STORAGE_KEY="ularSuvaiDemoCart";
+// Keep this list empty while every product is out of stock. Add exact product names only after physical stock is confirmed.
+const IN_STOCK_PRODUCTS = new Set([]);
+const STORAGE_KEY="ularSuvaiCartNov2026"; // new stock-aware cart version; old demo cart is intentionally not carried forward
 function samplePackFor(card){const section=card.closest("section[id]");return CATEGORY_SAMPLE_PACKS[section?.id]||{price:100,weight:"500g"};}
 const menuToggle=document.getElementById("menu-toggle"),navbar=document.getElementById("navbar"),header=document.getElementById("header");
 function closeMobileMenu(){if(!navbar||!menuToggle)return;navbar.classList.remove("active");menuToggle.setAttribute("aria-expanded","false");menuToggle.setAttribute("aria-label","Open Menu");const icon=menuToggle.querySelector("i");icon?.classList.add("fa-bars");icon?.classList.remove("fa-xmark");}
@@ -27,8 +29,44 @@ function showCartStep(){if(cartStep)cartStep.hidden=false;if(checkoutStep)checko
 function showCheckoutStep(){if(!cart.length)return;if(cartStep)cartStep.hidden=true;if(checkoutStep)checkoutStep.hidden=false;if(checkoutSuccess)checkoutSuccess.hidden=true;const title=document.getElementById("cart-title");if(title)title.textContent="Delivery & Payment";checkoutStep?.scrollTo({top:0,behavior:"smooth"});}
 function updateCount(){if(cartCount)cartCount.textContent=String(cart.reduce((n,x)=>n+x.quantity,0));}
 function renderCart(){if(!cartItems)return;updateCount();const total=cart.reduce((n,x)=>n+x.price*x.quantity,0);if(cartTotal)cartTotal.textContent="₹"+total.toFixed(2);if(checkoutNext)checkoutNext.disabled=!cart.length;if(!cart.length){cartItems.innerHTML='<p class="cart-empty">Your cart is empty. Add a product to get started.</p>';if(cartSummary)cartSummary.hidden=true;return;}if(cartSummary)cartSummary.hidden=false;cartItems.innerHTML=cart.map(x=>`<article class="cart-line" data-product-id="${x.id}">${x.image?`<img src="${x.image}" alt="">`:'<div class="cart-line-placeholder"><i class="fa-solid fa-fish"></i></div>'}<div><h4>${x.name}</h4><p>${x.description||""}</p><p class="cart-item-price">Price: ₹${x.price} / ${x.weight||"500g"}</p><div class="cart-quantity"><button type="button" data-cart-action="decrease" aria-label="Decrease quantity">−</button><span>${x.quantity}</span><button type="button" data-cart-action="increase" aria-label="Increase quantity">+</button></div></div><button type="button" class="cart-remove" data-cart-action="remove">Remove</button></article>`).join("");}
-function addToCart(card){const name=card.querySelector("h3")?.textContent.trim();if(!name)return;const description=card.querySelector(".product-info p")?.textContent.trim()||"",image=card.querySelector(".product-image img")?.getAttribute("src")||"",id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-"),pack=samplePackFor(card),category=card.closest("section[id]")?.id||"pickles",existing=cart.find(x=>x.id===id);if(existing){existing.quantity++;existing.price=pack.price;existing.weight=pack.weight;existing.category=category;}else cart.push({id,name,description,image,quantity:1,price:pack.price,weight:pack.weight,category});saveCart();showCartStep();renderCart();openCart();}
-document.querySelectorAll(".product-card").forEach(card=>{const info=card.querySelector(".product-info"),heading=info?.querySelector("h3");if(!info||!heading)return;const pack=samplePackFor(card);let label=info.querySelector(".sample-price");if(!label){label=document.createElement("p");label.className="sample-price";info.appendChild(label);}label.textContent="Price: ₹"+pack.price+" / "+pack.weight;let button=info.querySelector(".add-to-cart-btn");if(!button){button=document.createElement("button");button.type="button";button.className="add-to-cart-btn";button.innerHTML='<i class="fa-solid fa-cart-plus"></i> Add to Cart';info.appendChild(button);}button.addEventListener("click",()=>addToCart(card));});
+function addToCart(card){
+ const name=card.querySelector("h3")?.textContent.trim();
+ if(!name||!IN_STOCK_PRODUCTS.has(name))return;
+ const description=card.querySelector(".product-info p")?.textContent.trim()||"";
+ const image=card.querySelector(".product-image img")?.getAttribute("src")||"";
+ const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+ const pack=samplePackFor(card),category=card.closest("section[id]")?.id||"pickles";
+ const existing=cart.find(x=>x.id===id);
+ if(existing){existing.quantity++;existing.price=pack.price;existing.weight=pack.weight;existing.category=category;}
+ else cart.push({id,name,description,image,quantity:1,price:pack.price,weight:pack.weight,category});
+ saveCart();showCartStep();renderCart();openCart();
+}
+
+document.querySelectorAll(".product-card").forEach(card=>{
+ const info=card.querySelector(".product-info"),heading=info?.querySelector("h3");
+ if(!info||!heading)return;
+ const name=heading.textContent.trim(),inStock=IN_STOCK_PRODUCTS.has(name);
+ const image=card.querySelector(".product-image");
+ let badge=image?.querySelector(".stock-badge");
+ if(!badge&&image){badge=document.createElement("span");badge.className="stock-badge";image.appendChild(badge);}
+ if(badge){badge.textContent=inStock?"In Stock":"Out of Stock";badge.classList.toggle("is-in-stock",inStock);}
+ card.dataset.stock=inStock?"in-stock":"out-of-stock";
+ let button=info.querySelector(".add-to-cart-btn");
+ if(!button){button=document.createElement("button");button.type="button";button.className="add-to-cart-btn";info.appendChild(button);}
+ if(!inStock){
+   button.disabled=true;button.setAttribute("aria-disabled","true");button.title="This product is currently unavailable";
+   button.innerHTML='<i class="fa-solid fa-ban" aria-hidden="true"></i> Out of Stock';
+   info.querySelector(".sample-price")?.remove();
+ }else{
+   button.disabled=false;button.removeAttribute("aria-disabled");button.title="Add product to cart";
+   button.innerHTML='<i class="fa-solid fa-cart-plus" aria-hidden="true"></i> Add to Cart';
+   button.addEventListener("click",()=>addToCart(card));
+   const pack=samplePackFor(card);
+   let label=info.querySelector(".sample-price");
+   if(!label){label=document.createElement("p");label.className="sample-price";info.appendChild(label);}
+   label.textContent="Price: ₹"+pack.price+" / "+pack.weight;
+ }
+});
 cartItems?.addEventListener("click",e=>{const b=e.target.closest("[data-cart-action]");if(!b)return;const line=b.closest("[data-product-id]"),item=cart.find(x=>x.id===line?.dataset.productId);if(!item)return;if(b.dataset.cartAction==="increase")item.quantity++;if(b.dataset.cartAction==="decrease")item.quantity--;if(b.dataset.cartAction==="remove"||item.quantity<=0)cart=cart.filter(x=>x.id!==item.id);saveCart();renderCart();});
 cartToggle?.addEventListener("click",()=>{closeMobileMenu();showCartStep();renderCart();openCart();});cartClose?.addEventListener("click",closeCart);cartOverlay?.addEventListener("click",e=>{if(e.target===cartOverlay)closeCart();});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCart();});
 checkoutNext?.addEventListener("click",showCheckoutStep);backToCart?.addEventListener("click",()=>{showCartStep();renderCart();});
@@ -47,7 +85,9 @@ checkoutForm?.addEventListener("submit",async e=>{
  const button=document.getElementById("razorpay-pay-button");
 
  const items=cart.map(item=>({name:item.name,quantity:item.quantity,category:item.category}));
- const customer={name:customerName.value.trim(),countryCode:document.getElementById("country-code").value,phone:customerPhone.value,address:document.getElementById("customer-address").value.trim()};
+ const addressParts = ["customer-house","customer-street","customer-area","customer-city","customer-pincode"].map(id=>document.getElementById(id)?.value.trim()||"");
+  if(addressParts.some(part=>!part)){alert("Please complete all delivery address fields.");button.disabled=false;button.innerHTML=original;return;}
+  const customer={name:customerName.value.trim(),countryCode:document.getElementById("country-code").value,phone:customerPhone.value,address:addressParts.join(", ")};
  const original=button.innerHTML;button.disabled=true;button.textContent="Connecting to Razorpay...";
  try {
   const response=await fetch(PAYMENT_API_BASE+"/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items,customer})});
