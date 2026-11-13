@@ -72,6 +72,14 @@ const CATALOG = Object.freeze({
   ])
 });
 
+// INVENTORY CONTROL
+// All products in CATALOG are orderable by default.
+// Add exact "category:Product Name" values here to block ordering when stock runs out.
+// Examples: "pickles:Chicken Oorugai", "karuvadu:Sala", "palm-products:Karupatti".
+const OUT_OF_STOCK_PRODUCTS = new Set([
+  // "pickles:Chicken Oorugai",
+]);
+
 const ALLOWED_COUNTRY_CODES = new Set([
   "+91", "+1", "+44", "+971", "+966", "+974", "+965",
   "+968", "+973", "+94", "+60", "+65", "+61"
@@ -139,6 +147,9 @@ app.post("/api/create-order", async (req, res) => {
       const quantity = Number(item.quantity);
       if (!CATALOG[category]?.has(name) || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) {
         throw Object.assign(new Error("Cart contains an invalid product or quantity."), { status: 400 });
+      }
+      if (OUT_OF_STOCK_PRODUCTS.has(`${category}:${name}`)) {
+        throw Object.assign(new Error("One or more products are currently out of stock."), { status: 409 });
       }
       return { category, name, quantity, unitAmount: SAMPLE_PRICES[category] };
     });
