@@ -3207,3 +3207,106 @@ body { overflow-x: hidden; background: var(--cream); }
 
 /* Keep the circular logo above the About image overlay. */
 .about-logo-badge { z-index: 3; }
+
+
+/* Product inventory and price line: compact customer-facing availability */
+.product-info h3 {
+  color: #71340f;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+  letter-spacing: -.1px;
+}
+.product-meta {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:10px;
+  min-height:25px;
+}
+.product-meta .sample-price {
+  margin:0;
+  color:#6d421f;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.35;
+}
+.product-meta .stock-badge {
+  position:static;
+  display:inline-flex;
+  align-items:center;
+  min-height:21px;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.3px;
+  line-height:1.2;
+  text-transform:uppercase;
+  box-shadow:none;
+}
+.product-meta .stock-badge.is-in-stock {
+  background:#e8f3e9;
+  color:#24643b;
+  border:1px solid #c8dfcc;
+}
+.product-meta .stock-badge.is-out-of-stock {
+  background:#fae9e5;
+  color:#963e2e;
+  border:1px solid #ecc7bf;
+}
+.product-image .stock-badge { display:none; }
+.product-card[data-stock="in-stock"] .add-to-cart-btn {
+  background:#71340f;
+  color:#fffaf0;
+}
+.product-card[data-stock="in-stock"] .add-to-cart-btn:hover {
+  background:#8a481b;
+}
+.about-logo-badge {
+  width:132px;
+  height:132px;
+  gap:7px;
+  padding:14px 12px;
+}
+.about-logo-badge img {
+  width:82px;
+  height:76px;
+  object-fit:contain;
+  border-radius:0;
+  mix-blend-mode:multiply;
+}
+.about-logo-badge span {
+  display:block;
+  margin:0;
+  color:#71340f;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:2.1px;
+}
+.contact-map-heading a {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:8px 11px;
+  border:1px solid rgba(113,52,15,.18);
+  border-radius:8px;
+  background:#fff8e9;
+  color:#71340f;
+}
+.contact-map-heading a:hover {
+  background:#71340f;
+  color:#fff8e9;
+}
+@media(max-width:600px) {
+  .product-info h3 { font-size:11px; line-height:1.35; }
+  .product-meta { gap:5px; margin-top:8px; }
+  .product-meta .sample-price { font-size:9px; }
+  .product-meta .stock-badge { min-height:19px; padding:3px 6px; font-size:7px; }
+  .about-logo-badge { width:102px; height:102px; padding:9px 8px; gap:4px; }
+  .about-logo-badge img { width:65px; height:58px; }
+  .about-logo-badge span { font-size:7px; letter-spacing:1.7px; }
+}
