@@ -3204,3 +3204,6 @@ body { overflow-x: hidden; background: var(--cream); }
     letter-spacing: 1.2px;
   }
 }
+
+/* Keep the circular logo above the About image overlay. */
+.about-logo-badge { z-index: 3; }
