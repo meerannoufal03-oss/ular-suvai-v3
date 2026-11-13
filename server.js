@@ -72,14 +72,27 @@ const CATALOG = Object.freeze({
   ])
 });
 
-// INVENTORY CONTROL
-// All products in CATALOG are orderable by default.
-// Add exact "category:Product Name" values here to block ordering when stock runs out.
-// Examples: "pickles:Chicken Oorugai", "karuvadu:Sala", "palm-products:Karupatti".
-const OUT_OF_STOCK_PRODUCTS = new Set([
-  // "pickles:Chicken Oorugai",
-]);
-
+// OWNER-MANAGED INVENTORY
+// Both GitHub Pages and this API read the same file. Only repository editors can change it.
+const INVENTORY_URL = process.env.INVENTORY_URL || "https://raw.githubusercontent.com/meerannoufal03-oss/ular-suvai-v3/main/inventory.json";
+let inventoryCache = null;
+let inventoryFetchedAt = 0;
+const INVENTORY_CACHE_MS = 15_000;
+async function getInventoryProducts() {
+  if (inventoryCache && Date.now() - inventoryFetchedAt < INVENTORY_CACHE_MS) return inventoryCache;
+  let response;
+  try {
+    response = await fetch(INVENTORY_URL, { headers: { accept: "application/json", "cache-control": "no-cache" }, cache: "no-store" });
+  } catch {
+    throw Object.assign(new Error("Product availability could not be checked. Please try again."), { status: 503 });
+  }
+  if (!response.ok) throw Object.assign(new Error("Product availability could not be checked. Please try again."), { status: 503 });
+  const data = await response.json();
+  if (!data || !data.products || typeof data.products !== "object") throw Object.assign(new Error("Product availability settings are invalid."), { status: 503 });
+  inventoryCache = data.products;
+  inventoryFetchedAt = Date.now();
+  return inventoryCache;
+}
 const ALLOWED_COUNTRY_CODES = new Set([
   "+91", "+1", "+44", "+971", "+966", "+974", "+965",
   "+968", "+973", "+94", "+60", "+65", "+61"
@@ -140,6 +153,7 @@ app.post("/api/create-order", async (req, res) => {
       return res.status(400).json({ error: "Enter a valid delivery address." });
     }
 
+    const inventoryProducts = await getInventoryProducts();
     // Product name, category and quantity are allow-listed and prices are calculated here.
     const normalized = items.map(item => {
       const category = String(item.category || "");
@@ -148,7 +162,7 @@ app.post("/api/create-order", async (req, res) => {
       if (!CATALOG[category]?.has(name) || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) {
         throw Object.assign(new Error("Cart contains an invalid product or quantity."), { status: 400 });
       }
-      if (OUT_OF_STOCK_PRODUCTS.has(`${category}:${name}`)) {
+      if (inventoryProducts[category + ":" + name] !== true) {
         throw Object.assign(new Error("One or more products are currently out of stock."), { status: 409 });
       }
       return { category, name, quantity, unitAmount: SAMPLE_PRICES[category] };
