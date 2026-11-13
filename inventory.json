@@ -1,0 +1,27 @@
+{
+  "products": {
+    "pickles:Chicken Oorugai": true,
+    "pickles:Beef Oorugai": true,
+    "pickles:Mutton Oorugai": true,
+    "pickles:Fish Oorugai": true,
+    "palm-products:Karupatti": true,
+    "palm-products:Panangarkandu": true,
+    "uppukandam:Mutton Boneless Uppukandam": true,
+    "uppukandam:Beef Boneless Uppukandam": true,
+    "karuvadu:Sala": true,
+    "karuvadu:Thirukkai": true,
+    "karuvadu:Manja Paarai": true,
+    "karuvadu:Panna": true,
+    "karuvadu:Paalnethili": true,
+    "karuvadu:Kooni": true,
+    "karuvadu:Paal Sura": true,
+    "karuvadu:Keluthu": true,
+    "karuvadu:Maavula / Neduva": true,
+    "karuvadu:Naakku Meen": true,
+    "karuvadu:Seela / Vanjaram": true,
+    "karuvadu:Pola": true,
+    "karuvadu:Panna Kuthippu": true,
+    "karuvadu:Uluva": true,
+    "karuvadu:Parai": true
+  }
+}
