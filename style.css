@@ -3473,3 +3473,226 @@ body { overflow-x: hidden; background: var(--cream); }
     object-position:center center;
   }
 }
+
+
+/* Responsive storefront scale refinement — November 2026
+   Keep the hero proportionate and make product photography easier to scan. */
+@media (min-width: 601px) {
+  .hero {
+    height: clamp(540px, 68vh, 660px);
+    min-height: 540px;
+    background-position: center 48%;
+  }
+}
+
+/* Consistent, smaller product-image frames on desktop, laptop and mobile.
+   Contain keeps the full product visible instead of cutting off the subject. */
+.product-image {
+  height: auto !important;
+  aspect-ratio: 1.3 / 1 !important;
+  padding: 7px;
+  background: #f6efe4;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.product-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  border-radius: 8px;
+  transform: none;
+}
+.product-card:hover .product-image img {
+  transform: scale(1.015);
+}
+.product-image-placeholder {
+  font-size: 42px;
+}
+
+/* Karuvadu: keep the whole fish photo visible and correctly centred.
+   Do not apply a fixed crop or a downward image offset. */
+.karuvadu-grid .product-image {
+  aspect-ratio: 1.3 / 1 !important;
+  padding: 7px;
+  background: #f3eadc;
+}
+.karuvadu-grid .product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  transform: none;
+}
+.karuvadu-grid .product-card:hover .product-image img {
+  transform: scale(1.015);
+}
+.karuvadu-grid .product-image-placeholder {
+  display: grid;
+  place-items: center;
+}
+
+/* Desktop hero stays balanced instead of stretching too tall on large screens */
+@media (min-width: 993px) {
+  .hero {
+    height: clamp(560px, 68vh, 680px);
+    min-height: 560px;
+  }
+}
+
+/* Mobile: use a natural hero height that scales with the device viewport. */
+@media (max-width: 600px) {
+  .hero {
+    height: auto;
+    min-height: clamp(520px, 74svh, 620px);
+    padding-block: 38px;
+    background-position: center 48%;
+  }
+  .hero-container {
+    min-height: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero-content {
+    width: 100%;
+    max-width: 520px;
+    margin-inline: auto;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 8.2vw, 42px);
+    line-height: 1.12;
+  }
+  .hero p {
+    max-width: 430px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .product-grid, .karuvadu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 11px;
+  }
+  .product-image {
+    aspect-ratio: 1.3 / 1 !important;
+    padding: 5px;
+  }
+  .karuvadu-grid .product-image {
+    aspect-ratio: 1.3 / 1 !important;
+    padding: 5px;
+  }
+  .product-info {
+    padding: 10px;
+  }
+  .product-info h3 {
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+  .product-info p {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+  .product-meta {
+    gap: 5px;
+    margin-top: 7px;
+  }
+  .product-meta .sample-price {
+    font-size: 9px;
+  }
+  .product-meta .stock-badge {
+    min-height: 19px;
+    padding: 3px 6px;
+    font-size: 7px;
+  }
+  .add-to-cart-btn {
+    min-height: 36px;
+    margin-top: 9px;
+    font-size: 10px;
+  }
+}
+
+/* Our Collection: compact, readable rows so all four categories fit in one
+   phone view more comfortably, without losing the icon beside each title. */
+@media (max-width: 600px) {
+  .categories-section {
+    padding-top: 27px;
+    padding-bottom: 30px;
+  }
+  .categories-section .section-heading {
+    margin-bottom: 16px;
+  }
+  .categories-section .section-heading .section-subtitle {
+    margin-bottom: 7px;
+    font-size: 9px;
+    letter-spacing: 1.8px;
+  }
+  .categories-section .section-heading h2 {
+    margin-bottom: 8px;
+    font-size: clamp(22px, 6.2vw, 27px);
+    line-height: 1.2;
+  }
+  .categories-section .section-heading p {
+    margin: 0 auto;
+    max-width: 340px;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+  .categories-section .category-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .categories-section .category-card {
+    min-height: 0;
+    width: 100%;
+    border-radius: 14px;
+    background: #f8dfb7;
+    box-shadow: 0 4px 12px rgba(78,52,46,.06);
+  }
+  .categories-section .category-content {
+    padding: 10px 15px 11px;
+  }
+  .categories-section .category-title-row {
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .categories-section .category-title-row .category-symbol {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+  .categories-section .category-title-row h3 {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.25;
+  }
+  .categories-section .category-content p {
+    min-height: 0;
+    margin: 0 0 5px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+  .categories-section .category-link {
+    font-size: 9px;
+    line-height: 1.2;
+  }
+}
+
+/* Extra-small phones: retain two product columns without oversized photo panels. */
+@media (max-width: 380px) {
+  .product-grid, .karuvadu-grid {
+    gap: 12px 8px;
+  }
+  .product-image, .karuvadu-grid .product-image {
+    aspect-ratio: 1.25 / 1 !important;
+    padding: 4px;
+  }
+  .product-info {
+    padding: 9px;
+  }
+  .categories-section .category-content {
+    padding: 9px 12px 10px;
+  }
+}
