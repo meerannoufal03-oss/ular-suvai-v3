@@ -783,16 +783,16 @@
               <div class="address-field address-pincode"><label for="customer-pincode">PIN Code</label><input id="customer-pincode" name="pincode" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="6-digit PIN code" maxlength="6" minlength="6" pattern="[0-9]{6}" required></div>
             </div>
             <div class="payment-methods-info">
-                <h4>Payment options in Razorpay</h4>
-                <p>Choose from UPI, Debit / Credit Cards, Net Banking and Wallets in the secure Razorpay checkout window. Available options depend on the methods enabled for this Test Mode account.</p>
-                <p class="demo-note">Razorpay Test Mode only. Transactions are simulated; no real money will be collected.</p>
+                <h4>Secure payment with Razorpay</h4>
+                <p>Choose from the payment methods available in the secure Razorpay checkout window, such as UPI, Debit / Credit Cards, Net Banking and Wallets. Available methods depend on your Razorpay account activation.</p>
+                <p class="demo-note">Your payment is confirmed only after the server verifies the Razorpay transaction.</p>
             </div>
             <button type="submit" class="checkout-submit" id="razorpay-pay-button">Pay with Razorpay <i class="fa-solid fa-lock"></i></button>
-            <p class="demo-note">Test Mode only — transactions are simulated. No real money will be collected.</p></form>
+            <p class="demo-note">Secure online payment powered by Razorpay. Do not close the page until payment verification finishes.</p></form>
         </div>
         <div class="checkout-success" id="checkout-success" role="status" hidden>
-            <i class="fa-solid fa-circle-check"></i><h3>Demo order created!</h3>
-            <p id="success-message">Your checkout preview is complete. No real order or payment was made.</p>
+            <i class="fa-solid fa-circle-check"></i><h3>Order confirmed!</h3>
+            <p id="success-message">Your payment status will appear here after secure verification.</p>
             <button type="button" id="continue-shopping">Continue Shopping</button>
         </div>
     </section>
