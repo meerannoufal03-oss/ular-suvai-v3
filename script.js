@@ -1,4 +1,4 @@
-// ULAR SUVAI - NAVIGATION, CART AND TWO-STEP DEMO CHECKOUT
+// ULAR SUVAI - NAVIGATION, CART AND TWO-STEP ONLINE CHECKOUT
 // Temporary category-wise sample prices only. Replace with approved prices later.
 const CATEGORY_SAMPLE_PACKS={
  pickles:{price:150,weight:"500g"},
@@ -127,20 +127,20 @@ checkoutForm?.addEventListener("submit",async e=>{
   const response=await fetch(PAYMENT_API_BASE+"/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items,customer})});
   const order=await response.json();if(!response.ok)throw new Error(order.error||"Could not create Razorpay order.");
   if(!window.Razorpay)throw new Error("Razorpay Checkout did not load. Refresh and try again.");
-  const checkout=new window.Razorpay({key:order.keyId,amount:order.amount,currency:order.currency,name:"Ular Suvai",description:"Ular Suvai Test Order",order_id:order.orderId,prefill:{name:customer.name,contact:customer.phone},theme:{color:"#74350b"},
+  const checkout=new window.Razorpay({key:order.keyId,amount:order.amount,currency:order.currency,name:"Ular Suvai",description:"Ular Suvai Online Order",order_id:order.orderId,prefill:{name:customer.name,contact:customer.phone},theme:{color:"#74350b"},
    handler:async result=>{
     try{
      const verify=await fetch(PAYMENT_API_BASE+"/api/verify-payment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(result)});
      const checked=await verify.json();if(!verify.ok||!checked.verified)throw new Error(checked.error||"Payment verification failed.");
      checkoutStep.hidden=true;checkoutSuccess.hidden=false;
-     document.getElementById("success-message").textContent="Test payment verified successfully. Payment ID: "+checked.paymentId+". This was a Razorpay Test Mode transaction; no real money was collected.";
+     document.getElementById("success-message").textContent=checked.mode==="live"?"Your payment has been received and verified. Payment ID: "+checked.paymentId+". Please keep this reference for your records.":"Test payment verified successfully. Payment ID: "+checked.paymentId+". No real money was collected in Test Mode.";
      cart=[];saveCart();updateCount();
     }catch(err){alert(err.message);}
     finally{button.disabled=false;button.innerHTML=original;}
    },
    modal:{ondismiss:()=>{button.disabled=false;button.innerHTML=original;}}
   });
-  checkout.on("payment.failed",failure=>{alert(failure.error?.description||"Test payment failed. Please try again.");button.disabled=false;button.innerHTML=original;});
+  checkout.on("payment.failed",failure=>{alert(failure.error?.description||"Payment failed or was cancelled. Please try again.");button.disabled=false;button.innerHTML=original;});
   checkout.open();
  }catch(error){alert(error.message);button.disabled=false;button.innerHTML=original;}
 });
