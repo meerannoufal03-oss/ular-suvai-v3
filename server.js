@@ -10,6 +10,11 @@ app.use(express.json({ limit: "32kb" }));
 const PORT = process.env.PORT || 3000;
 const KEY_ID = process.env.RAZORPAY_KEY_ID || "";
 const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "";
+const PAYMENT_MODE = KEY_ID.startsWith("rzp_live_")
+  ? "live"
+  : KEY_ID.startsWith("rzp_test_") ? "test" : "unconfigured";
+const LIVE_PAYMENTS_ENABLED = process.env.LIVE_PAYMENTS_ENABLED === "true";
+const LIVE_PRICES_CONFIRMED = process.env.LIVE_PRICES_CONFIRMED === "true";
 const DEFAULT_FRONTEND_ORIGIN = "https://meerannoufal03-oss.github.io";
 const allowedOrigins = new Set(
   (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_ORIGIN || DEFAULT_FRONTEND_ORIGIN)
@@ -30,15 +35,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// Deliberately restrict this service to Razorpay Test Mode credentials.
-const isTestKey = KEY_ID.startsWith("rzp_test_");
+// Supports separate Razorpay Test and Live API key pairs.
+// The key secret is read only by this backend and is never returned to Checkout.
 function getRazorpay() {
-  if (!KEY_ID || !KEY_SECRET || !isTestKey) {
-    const error = new Error("Razorpay Test Mode keys are not configured on the server.");
+  const validMode = PAYMENT_MODE === "test" || PAYMENT_MODE === "live";
+  if (!KEY_ID || !KEY_SECRET || !validMode) {
+    const error = new Error("Razorpay API keys are not configured. Add a valid Test or Live key pair to the server.");
     error.status = 503;
     throw error;
   }
   return new Razorpay({ key_id: KEY_ID, key_secret: KEY_SECRET });
+}
+
+function ensureCheckoutEnabled() {
+  if (PAYMENT_MODE === "live" && (!LIVE_PAYMENTS_ENABLED || !LIVE_PRICES_CONFIRMED)) {
+    const error = new Error("Live checkout is temporarily disabled until the final selling prices are confirmed and Live payments are enabled.");
+    error.status = 503;
+    throw error;
+  }
 }
 
 function sendError(res, error) {
@@ -98,20 +112,13 @@ const ALLOWED_COUNTRY_CODES = new Set([
   "+968", "+973", "+94", "+60", "+65", "+61"
 ]);
 
-// Memory-based protection is suitable for this single-instance Test Mode service.
-// A production deployment should persist pending orders and use webhooks.
-const pendingOrders = new Map();
+// Per-instance abuse protection. Payment verification itself is based on
+// the signed Razorpay order plus the order record fetched from Razorpay, not
+// volatile process memory, so a server restart cannot invalidate a paid order.
 const createOrderAttempts = new Map();
 const ORDER_WINDOW_MS = 60_000;
 const ORDER_LIMIT_PER_WINDOW = 12;
-const PENDING_ORDER_TTL_MS = 60 * 60 * 1000;
 
-function cleanExpiredOrders() {
-  const expiry = Date.now() - PENDING_ORDER_TTL_MS;
-  for (const [id, record] of pendingOrders) {
-    if (record.createdAt < expiry) pendingOrders.delete(id);
-  }
-}
 function canCreateOrder(ip) {
   const now = Date.now();
   const current = createOrderAttempts.get(ip);
@@ -124,16 +131,23 @@ function canCreateOrder(ip) {
 }
 
 app.get("/api/health", (_req, res) => {
+  const configured = Boolean(KEY_ID && KEY_SECRET &&
+    (PAYMENT_MODE === "test" || PAYMENT_MODE === "live"));
   res.json({
     ok: true,
     paymentProvider: "Razorpay",
-    mode: "test",
-    configured: Boolean(KEY_ID && KEY_SECRET && isTestKey)
+    mode: PAYMENT_MODE,
+    configured,
+    canAcceptPayments: configured && (
+      PAYMENT_MODE === "test" || (LIVE_PAYMENTS_ENABLED && LIVE_PRICES_CONFIRMED)
+    ),
+    livePricesConfirmed: LIVE_PRICES_CONFIRMED
   });
 });
 
 app.post("/api/create-order", async (req, res) => {
   try {
+    ensureCheckoutEnabled();
     if (!canCreateOrder(req.ip || req.socket.remoteAddress || "unknown")) {
       return res.status(429).json({ error: "Too many checkout attempts. Please wait a moment and try again." });
     }
@@ -170,36 +184,35 @@ app.post("/api/create-order", async (req, res) => {
 
     const amount = normalized.reduce((sum, item) => sum + item.unitAmount * item.quantity, 0);
     if (!Number.isSafeInteger(amount) || amount < 100 || amount > 5_000_000) {
-      return res.status(400).json({ error: "Order amount is outside the allowed demo range." });
+      return res.status(400).json({ error: "Order amount is outside the allowed range." });
     }
 
     const instance = getRazorpay();
+    const itemsSummary = normalized.map(item => `${item.name} x${item.quantity}`).join("; ");
+    const deliveryAddress = String(customer.address).trim();
     const order = await instance.orders.create({
       amount,
       currency: "INR",
-      receipt: `us_${Date.now()}`,
-      // Ask Razorpay to capture the payment automatically for this order.
-      // The verification route below also safely captures an authorized payment
-      // if account-level settings or a delayed authorization leave it uncaptured.
+      receipt: `us_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
       payment: { capture: "automatic" },
+      // Keep fulfilment details in Razorpay Order Notes for the merchant.
+      // Each value stays within Razorpay's 256-character note value limit.
       notes: {
         customer_name: customerName.slice(0, 100),
         customer_phone: `${customer.countryCode}${customer.phone}`,
+        delivery_address_1: deliveryAddress.slice(0, 250),
+        delivery_address_2: deliveryAddress.slice(250, 500),
+        items_summary_1: itemsSummary.slice(0, 250),
+        items_summary_2: itemsSummary.slice(250, 500),
+        items_summary_3: itemsSummary.slice(500, 750),
         sample_pricing: "true",
         item_count: String(normalized.reduce((sum, item) => sum + item.quantity, 0)),
-        checkout: "ular_suvai_test_checkout"
+        checkout: `ular_suvai_${PAYMENT_MODE}_checkout`
       }
     });
 
-    cleanExpiredOrders();
-    pendingOrders.set(order.id, {
-      amount: order.amount,
-      currency: order.currency,
-      createdAt: Date.now()
-    });
-
     // Key ID is public and required by Checkout.js; Key Secret never leaves this server.
-    res.json({ keyId: KEY_ID, orderId: order.id, amount: order.amount, currency: order.currency });
+    res.json({ keyId: KEY_ID, orderId: order.id, amount: order.amount, currency: order.currency, mode: PAYMENT_MODE });
   } catch (error) {
     sendError(res, error);
   }
@@ -213,13 +226,6 @@ app.post("/api/verify-payment", async (req, res) => {
       return res.status(400).json({ error: "Payment verification details are missing." });
     }
 
-    // Verify only order IDs that this server created and stored.
-    cleanExpiredOrders();
-    const pendingOrder = pendingOrders.get(razorpay_order_id);
-    if (!pendingOrder) {
-      return res.status(400).json({ verified: false, error: "This checkout order is not valid or has expired. Please create a new order." });
-    }
-
     const expected = crypto.createHmac("sha256", KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
@@ -231,16 +237,27 @@ app.post("/api/verify-payment", async (req, res) => {
     }
 
     const razorpay = getRazorpay();
-    let payment = await razorpay.payments.fetch(razorpay_payment_id);
+    // Fetch the order from Razorpay, not a volatile server-side Map.
     const originalOrder = await razorpay.orders.fetch(razorpay_order_id);
+    const expectedCheckoutNote = `ular_suvai_${PAYMENT_MODE}_checkout`;
+    if (
+      !String(originalOrder.receipt || "").startsWith("us_") ||
+      originalOrder.notes?.checkout !== expectedCheckoutNote
+    ) {
+      return res.status(400).json({
+        verified: false,
+        error: "This Razorpay order was not created by the current Ular Suvai checkout."
+      });
+    }
+    let payment = await razorpay.payments.fetch(razorpay_payment_id);
 
     // Validate identity and the full authorized amount before attempting capture.
     if (
       payment.order_id !== razorpay_order_id ||
-      payment.currency !== pendingOrder.currency ||
-      originalOrder.currency !== pendingOrder.currency ||
-      payment.amount !== pendingOrder.amount ||
-      originalOrder.amount !== pendingOrder.amount
+      payment.currency !== originalOrder.currency ||
+      originalOrder.currency !== originalOrder.currency ||
+      payment.amount !== originalOrder.amount ||
+      originalOrder.amount !== originalOrder.amount
     ) {
       return res.status(409).json({
         verified: false,
@@ -254,8 +271,8 @@ app.post("/api/verify-payment", async (req, res) => {
       try {
         payment = await razorpay.payments.capture(
           razorpay_payment_id,
-          pendingOrder.amount,
-          pendingOrder.currency
+          originalOrder.amount,
+          originalOrder.currency
         );
       } catch (captureError) {
         // Auto-capture may complete between our fetch and capture request.
@@ -268,10 +285,10 @@ app.post("/api/verify-payment", async (req, res) => {
     const order = await razorpay.orders.fetch(razorpay_order_id);
     if (
       payment.order_id !== razorpay_order_id ||
-      payment.currency !== pendingOrder.currency ||
-      order.currency !== pendingOrder.currency ||
-      payment.amount !== pendingOrder.amount ||
-      order.amount !== pendingOrder.amount ||
+      payment.currency !== originalOrder.currency ||
+      order.currency !== originalOrder.currency ||
+      payment.amount !== originalOrder.amount ||
+      order.amount !== originalOrder.amount ||
       // Razorpay's Payment entity confirms capture via captured + status.
       // Do not require amount_captured: it is not part of the documented
       // captured Payment entity response; exact amount is checked above.
@@ -285,11 +302,11 @@ app.post("/api/verify-payment", async (req, res) => {
         paymentAmount: payment.amount,
         orderStatus: order.status,
         orderAmount: order.amount,
-        expectedAmount: pendingOrder.amount,
+        expectedAmount: originalOrder.amount,
         orderIdMatches: payment.order_id === razorpay_order_id,
         paymentCurrency: payment.currency,
         orderCurrency: order.currency,
-        expectedCurrency: pendingOrder.currency
+        expectedCurrency: originalOrder.currency
       }));
       return res.status(409).json({
         verified: false,
@@ -297,13 +314,14 @@ app.post("/api/verify-payment", async (req, res) => {
       });
     }
 
-    pendingOrders.delete(razorpay_order_id);
     res.json({
       verified: true,
       paymentId: payment.id,
+      orderId: razorpay_order_id,
       status: payment.status,
       amount: payment.amount,
-      currency: payment.currency
+      currency: payment.currency,
+      mode: PAYMENT_MODE
     });
   } catch (error) {
     sendError(res, error);
@@ -311,5 +329,8 @@ app.post("/api/verify-payment", async (req, res) => {
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Ular Suvai Razorpay Test API listening on ${PORT}; test credentials configured: ${Boolean(KEY_ID && KEY_SECRET && isTestKey)}`);
+  const configured = Boolean(KEY_ID && KEY_SECRET &&
+    (PAYMENT_MODE === "test" || PAYMENT_MODE === "live"));
+  const liveEnabled = PAYMENT_MODE === "live" && LIVE_PAYMENTS_ENABLED && LIVE_PRICES_CONFIRMED;
+  console.log(`Ular Suvai Razorpay API listening on ${PORT}; mode: ${PAYMENT_MODE}; credentials configured: ${configured}; live checkout enabled: ${liveEnabled}`);
 });
