@@ -733,8 +733,8 @@
 </button>
 
 
-<!-- DEMO SHOPPING CART AND CHECKOUT -->
-<!-- Temporary category-wise demo prices only: Pickles ₹150; Palm Products ₹80; Uppukandam ₹220; Karuvadu ₹120. Update when official prices are confirmed. -->
+<!-- SHOPPING CART AND LIVE RAZORPAY CHECKOUT -->
+<!-- Temporary live-test price: ₹1 per 500g pack for every product. Live Razorpay payments charge real money. -->
 
 <div class="cart-overlay" id="cart-overlay" aria-hidden="true">
     <section class="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">
@@ -746,7 +746,7 @@
         <div class="cart-items" id="cart-items"><p class="cart-empty">Your cart is empty. Add a product to get started.</p></div>
             <div class="cart-summary" id="cart-summary">
                 <div class="cart-summary-row"><span>Cart total</span><strong id="cart-total">₹0.00</strong></div>
-                <p>Demo sample prices only. Final product prices will be updated later. Delivery charges are not included.</p>
+                <p>Temporary live-test price: ₹1 per 500g pack for every product. This is a real payment. Delivery charges are not included.</p>
             </div>
             <button type="button" class="checkout-next-btn" id="checkout-next" disabled>Continue to Delivery Details <i class="fa-solid fa-arrow-right"></i></button>
         </div>
@@ -800,7 +800,7 @@
 </div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script src="script.js?v=20261119-payment-readiness-1"></script>
+<script src="script.js?v=20261119-live-one-rupee-1"></script>
 
 </body>
 </html>
