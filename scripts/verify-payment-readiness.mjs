@@ -16,9 +16,6 @@ const passed = [];
 function check(condition, message) {
   (condition ? passed : failures).push(message);
 }
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 const apiMatch = storefront.match(/const PAYMENT_API_BASE=window\.ULAR_SUVAI_PAYMENT_API \|\| "([^"]+)"/);
 check(apiMatch?.[1] === "https://ular-suvai-razorpay-test-api.onrender.com",
@@ -61,8 +58,10 @@ const backPrices = server.match(/const SAMPLE_PRICES = Object\.freeze\(\{([\s\S]
 const categories = ["pickles", "palm-products", "uppukandam", "karuvadu"];
 let pricesMatch = Boolean(frontPrices && backPrices);
 for (const category of categories) {
-  const fr = new RegExp(escapeRegExp(category) + "[\\\"\\\']?\\s*:\\s*\\{\\s*price:\\s*(\\d+)", "m").exec(frontPrices);
-  const br = new RegExp(escapeRegExp(category) + "[\\\"\\\']?\\s*:\\s*(\\d+)", "m").exec(backPrices);
+  const frontLine = frontPrices.split("\n").find(line => line.includes(category));
+  const backLine = backPrices.split("\n").find(line => line.includes(category));
+  const fr = frontLine?.match(/price:[ ]*([0-9]+)/);
+  const br = backLine?.match(/:[ ]*([0-9]+)/);
   if (!fr || !br || Number(fr[1]) * 100 !== Number(br[1])) pricesMatch = false;
 }
 check(pricesMatch, "Displayed sample prices and backend charge amounts match for all four categories.");
