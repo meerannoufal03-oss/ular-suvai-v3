@@ -103,7 +103,7 @@ document.querySelectorAll(".product-card").forEach(card=>{
 
 cartItems?.addEventListener("click",e=>{const b=e.target.closest("[data-cart-action]");if(!b)return;const line=b.closest("[data-product-id]"),item=cart.find(x=>x.id===line?.dataset.productId);if(!item)return;if(b.dataset.cartAction==="increase")item.quantity++;if(b.dataset.cartAction==="decrease")item.quantity--;if(b.dataset.cartAction==="remove"||item.quantity<=0)cart=cart.filter(x=>x.id!==item.id);saveCart();renderCart();});
 cartToggle?.addEventListener("click",()=>{closeMobileMenu();showCartStep();renderCart();openCart();});cartClose?.addEventListener("click",closeCart);cartOverlay?.addEventListener("click",e=>{if(e.target===cartOverlay)closeCart();});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCart();});
-checkoutNext?.addEventListener("click",showCheckoutStep);backToCart?.addEventListener("click",()=>{showCartStep();renderCart();});
+checkoutNext?.addEventListener("click",()=>{showCheckoutStep();void refreshPaymentStatus();});backToCart?.addEventListener("click",()=>{showCartStep();renderCart();});
 const customerName=document.getElementById("customer-name");
 customerName?.addEventListener("input",()=>{
  const cleaned=customerName.value.replace(/[^A-Za-z ]/g,"").replace(/ {2,}/g," ");
@@ -113,6 +113,41 @@ customerName?.addEventListener("blur",()=>{
  customerName.value=customerName.value.trim().replace(/ +/g," ");
 });
 const customerPhone=document.getElementById("customer-phone");customerPhone?.addEventListener("input",()=>{const v=customerPhone.value.replace(/\D/g,"").slice(0,10);if(v!==customerPhone.value)customerPhone.value=v;});
+const paymentModeStatus=document.getElementById("payment-mode-status");
+const razorpayPayButton=document.getElementById("razorpay-pay-button");
+let paymentHealth=null;
+function renderPaymentModeStatus(message,state){
+ if(!paymentModeStatus)return;
+ paymentModeStatus.textContent=message;
+ paymentModeStatus.dataset.state=state;
+}
+async function refreshPaymentStatus(){
+ try{
+  const response=await fetch(PAYMENT_API_BASE+"/api/health",{cache:"no-store"});
+  const health=await response.json();
+  if(!response.ok||health?.ok!==true)throw new Error("Payment service health check failed.");
+  paymentHealth=health;
+  const ready=health.configured===true&&health.canAcceptPayments===true;
+  if(!health.configured||!["test","live"].includes(health.mode)){
+   renderPaymentModeStatus("Razorpay is not configured. Payment checkout is unavailable.", "error");
+  }else if(health.mode==="test"&&ready){
+   renderPaymentModeStatus("Razorpay Test Mode is active. Payments are simulated; no real money is collected.", "test");
+  }else if(health.mode==="live"&&!ready){
+   renderPaymentModeStatus("A Live key is connected, but checkout is safely locked. Switch to the matching Razorpay Test keys to run a no-money test.", "locked");
+  }else if(health.mode==="live"&&ready){
+   renderPaymentModeStatus("Razorpay Live Mode is enabled. Customers will be charged real money.", "live");
+  }else{
+   renderPaymentModeStatus("Razorpay checkout is currently unavailable.", "error");
+  }
+  if(razorpayPayButton)razorpayPayButton.disabled=!ready;
+  return health;
+ }catch(error){
+  paymentHealth=null;
+  renderPaymentModeStatus("Could not reach the Razorpay service. Check the backend URL and Render service status.", "error");
+  if(razorpayPayButton)razorpayPayButton.disabled=true;
+  return null;
+ }
+}
 checkoutForm?.addEventListener("submit",async e=>{
  e.preventDefault();
  if(!cart.length||!checkoutForm.reportValidity())return;
@@ -124,6 +159,13 @@ checkoutForm?.addEventListener("submit",async e=>{
  const customer={name:customerName.value.trim(),countryCode:document.getElementById("country-code").value,phone:customerPhone.value,address:addressParts.join(", ")};
  button.disabled=true;button.textContent="Connecting to Razorpay...";
  try {
+  const health=await refreshPaymentStatus();
+  if(!health?.configured)throw new Error("Razorpay is not configured or the payment service cannot be reached.");
+  if(!health.canAcceptPayments){
+   throw new Error(health.mode==="live"
+    ?"The backend currently has a Live key, but Live checkout is locked. Set a matching Razorpay Test Key ID and Test Key Secret in Render to run a simulated test."
+    :"Razorpay checkout is currently unavailable. Please check the payment service configuration.");
+  }
   const response=await fetch(PAYMENT_API_BASE+"/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items,customer})});
   const order=await response.json();if(!response.ok)throw new Error(order.error||"Could not create Razorpay order.");
   if(!window.Razorpay)throw new Error("Razorpay Checkout did not load. Refresh and try again.");
@@ -136,18 +178,18 @@ checkoutForm?.addEventListener("submit",async e=>{
      document.getElementById("success-message").textContent=checked.mode==="live"?"Your payment has been received and verified. Payment ID: "+checked.paymentId+". Please keep this reference for your records.":"Test payment verified successfully. Payment ID: "+checked.paymentId+". No real money was collected in Test Mode.";
      cart=[];saveCart();updateCount();
     }catch(err){alert(err.message);}
-    finally{button.disabled=false;button.innerHTML=original;}
+    finally{button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);button.innerHTML=original;}
    },
-   modal:{ondismiss:()=>{button.disabled=false;button.innerHTML=original;}}
+   modal:{ondismiss:()=>{button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);button.innerHTML=original;}}
   });
-  checkout.on("payment.failed",failure=>{alert(failure.error?.description||"Payment failed or was cancelled. Please try again.");button.disabled=false;button.innerHTML=original;});
+  checkout.on("payment.failed",failure=>{alert(failure.error?.description||"Payment failed or was cancelled. Please try again.");button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);button.innerHTML=original;});
   checkout.open();
- }catch(error){alert(error.message);button.disabled=false;button.innerHTML=original;}
+ }catch(error){alert(error.message);button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);button.innerHTML=original;}
 });
 continueShopping?.addEventListener("click",()=>{checkoutForm.reset();showCartStep();renderCart();closeCart();});
 async function initialiseStorefront() {
  try {
-  await loadInventory();
+  await Promise.all([loadInventory(),refreshPaymentStatus()]);
   cart = cart.filter(item => isProductInStock(item.category || "pickles", item.name));
   saveCart();
   renderProductCards();
