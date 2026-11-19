@@ -133,11 +133,13 @@ function canCreateOrder(ip) {
 app.get("/api/health", (_req, res) => {
   const configured = Boolean(KEY_ID && KEY_SECRET &&
     (PAYMENT_MODE === "test" || PAYMENT_MODE === "live"));
+  res.setHeader("Cache-Control", "no-store");
   res.json({
     ok: true,
     paymentProvider: "Razorpay",
     mode: PAYMENT_MODE,
     configured,
+    livePaymentsEnabled: LIVE_PAYMENTS_ENABLED,
     canAcceptPayments: configured && (
       PAYMENT_MODE === "test" || (LIVE_PAYMENTS_ENABLED && LIVE_PRICES_CONFIRMED)
     ),
@@ -251,13 +253,20 @@ app.post("/api/verify-payment", async (req, res) => {
     }
     let payment = await razorpay.payments.fetch(razorpay_payment_id);
 
-    // Validate identity and the full authorized amount before attempting capture.
+    // Validate the fetched Razorpay entities before attempting any capture.
+    // Orders for this storefront must always be INR and within the server's order limit.
+    const expectedAmount = originalOrder.amount;
     if (
+      originalOrder.id !== razorpay_order_id ||
+      !Number.isSafeInteger(expectedAmount) ||
+      expectedAmount < 100 ||
+      expectedAmount > 5_000_000 ||
+      originalOrder.currency !== "INR" ||
+      payment.id !== razorpay_payment_id ||
       payment.order_id !== razorpay_order_id ||
+      payment.currency !== "INR" ||
       payment.currency !== originalOrder.currency ||
-      originalOrder.currency !== originalOrder.currency ||
-      payment.amount !== originalOrder.amount ||
-      originalOrder.amount !== originalOrder.amount
+      payment.amount !== expectedAmount
     ) {
       return res.status(409).json({
         verified: false,
@@ -284,11 +293,14 @@ app.post("/api/verify-payment", async (req, res) => {
 
     const order = await razorpay.orders.fetch(razorpay_order_id);
     if (
+      payment.id !== razorpay_payment_id ||
       payment.order_id !== razorpay_order_id ||
+      payment.currency !== "INR" ||
+      order.currency !== "INR" ||
       payment.currency !== originalOrder.currency ||
       order.currency !== originalOrder.currency ||
-      payment.amount !== originalOrder.amount ||
-      order.amount !== originalOrder.amount ||
+      payment.amount !== expectedAmount ||
+      order.amount !== expectedAmount ||
       // Razorpay's Payment entity confirms capture via captured + status.
       // Do not require amount_captured: it is not part of the documented
       // captured Payment entity response; exact amount is checked above.
