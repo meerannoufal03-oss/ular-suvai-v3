@@ -166,6 +166,8 @@ checkoutForm?.addEventListener("submit",async e=>{
     ?"The backend currently has a Live key, but Live checkout is locked. Set a matching Razorpay Test Key ID and Test Key Secret in Render to run a simulated test."
     :"Razorpay checkout is currently unavailable. Please check the payment service configuration.");
   }
+  button.disabled=true;
+  button.textContent="Connecting to Razorpay...";
   const response=await fetch(PAYMENT_API_BASE+"/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items,customer})});
   const order=await response.json();if(!response.ok)throw new Error(order.error||"Could not create Razorpay order.");
   if(!window.Razorpay)throw new Error("Razorpay Checkout did not load. Refresh and try again.");
