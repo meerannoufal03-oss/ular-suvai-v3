@@ -61,8 +61,8 @@ const backPrices = server.match(/const SAMPLE_PRICES = Object\.freeze\(\{([\s\S]
 const categories = ["pickles", "palm-products", "uppukandam", "karuvadu"];
 let pricesMatch = Boolean(frontPrices && backPrices);
 for (const category of categories) {
-  const fr = new RegExp(escapeRegExp(category) + "\\s*:\\s*\\{\\s*price:\\s*(\\d+)", "m").exec(frontPrices);
-  const br = new RegExp(escapeRegExp(category) + "\\s*:\\s*(\\d+)", "m").exec(backPrices);
+  const fr = new RegExp(escapeRegExp(category) + "[\\\"\\\']?\\s*:\\s*\\{\\s*price:\\s*(\\d+)", "m").exec(frontPrices);
+  const br = new RegExp(escapeRegExp(category) + "[\\\"\\\']?\\s*:\\s*(\\d+)", "m").exec(backPrices);
   if (!fr || !br || Number(fr[1]) * 100 !== Number(br[1])) pricesMatch = false;
 }
 check(pricesMatch, "Displayed sample prices and backend charge amounts match for all four categories.");
