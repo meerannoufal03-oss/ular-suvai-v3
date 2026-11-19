@@ -1,10 +1,10 @@
 // ULAR SUVAI - NAVIGATION, CART AND TWO-STEP ONLINE CHECKOUT
-// Temporary category-wise sample prices only. Replace with approved prices later.
+// Temporary live-test price: ₹1 per 500g pack for every product. Live Razorpay payments charge real money.
 const CATEGORY_SAMPLE_PACKS={
- pickles:{price:150,weight:"500g"},
- "palm-products":{price:80,weight:"500g"},
- uppukandam:{price:220,weight:"500g"},
- karuvadu:{price:120,weight:"500g"}
+ pickles:{price:1,weight:"500g"},
+ "palm-products":{price:1,weight:"500g"},
+ uppukandam:{price:1,weight:"500g"},
+ karuvadu:{price:1,weight:"500g"}
 };
 const PAYMENT_API_BASE=window.ULAR_SUVAI_PAYMENT_API || "https://ular-suvai-razorpay-test-api.onrender.com";
 // Product stock is maintained by the owner in inventory.json.
@@ -25,7 +25,7 @@ function isProductInStock(category, name) {
   return INVENTORY_READY && INVENTORY_PRODUCTS[category + ":" + name] === true;
 }
 const STORAGE_KEY="ularSuvaiCartNov2026"; // new stock-aware cart version; old demo cart is intentionally not carried forward
-function samplePackFor(card){const section=card.closest("section[id]");return CATEGORY_SAMPLE_PACKS[section?.id]||{price:100,weight:"500g"};}
+function samplePackFor(card){const section=card.closest("section[id]");return CATEGORY_SAMPLE_PACKS[section?.id]||{price:1,weight:"500g"};}
 const menuToggle=document.getElementById("menu-toggle"),navbar=document.getElementById("navbar"),header=document.getElementById("header");
 function closeMobileMenu(){if(!navbar||!menuToggle)return;navbar.classList.remove("active");menuToggle.setAttribute("aria-expanded","false");menuToggle.setAttribute("aria-label","Open Menu");const icon=menuToggle.querySelector("i");icon?.classList.add("fa-bars");icon?.classList.remove("fa-xmark");}
 menuToggle?.addEventListener("click",()=>{const open=navbar?.classList.toggle("active")||false;menuToggle.setAttribute("aria-expanded",String(open));menuToggle.setAttribute("aria-label",open?"Close Menu":"Open Menu");const icon=menuToggle.querySelector("i");if(open){icon?.classList.remove("fa-bars");icon?.classList.add("fa-xmark");}else{icon?.classList.add("fa-bars");icon?.classList.remove("fa-xmark");}});
@@ -35,7 +35,7 @@ window.addEventListener("scroll",updateHeader,{passive:true});updateHeader();
 document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener("click",e=>{const sel=a.getAttribute("href");if(!sel||sel==="#")return;const target=document.querySelector(sel);if(!target)return;e.preventDefault();window.scrollTo({top:target.getBoundingClientRect().top+window.scrollY-(header?.offsetHeight||0),behavior:"smooth"});}));
 const backToTop=document.getElementById("backToTop");window.addEventListener("scroll",()=>backToTop?.classList.toggle("show",window.scrollY>500));backToTop?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));window.addEventListener("resize",()=>{if(window.innerWidth>992)closeMobileMenu();});
 document.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{img.classList.add("image-error");img.alt="Ular Suvai Product Image";}));
-let cart=[];try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(Array.isArray(data))cart=data.filter(x=>x&&x.id&&x.name).map(x=>{const card=[...document.querySelectorAll(".product-card")].find(c=>c.querySelector("h3")?.textContent.trim()===x.name);const category=card?.closest("section[id]")?.id||x.category||"pickles";const pack=CATEGORY_SAMPLE_PACKS[category]||{price:Number(x.price)||100,weight:x.weight||"500g"};return {...x,quantity:Math.max(1,Number(x.quantity)||1),price:pack.price,weight:pack.weight,category};});}catch(e){cart=[];}
+let cart=[];try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(Array.isArray(data))cart=data.filter(x=>x&&x.id&&x.name).map(x=>{const card=[...document.querySelectorAll(".product-card")].find(c=>c.querySelector("h3")?.textContent.trim()===x.name);const category=card?.closest("section[id]")?.id||x.category||"pickles";const pack=CATEGORY_SAMPLE_PACKS[category]||{price:Number(x.price)||1,weight:x.weight||"500g"};return {...x,quantity:Math.max(1,Number(x.quantity)||1),price:pack.price,weight:pack.weight,category};});}catch(e){cart=[];}
 const cartToggle=document.getElementById("cart-toggle"),cartOverlay=document.getElementById("cart-overlay"),cartClose=document.getElementById("cart-close"),cartItems=document.getElementById("cart-items"),cartCount=document.getElementById("cart-count"),checkoutForm=document.getElementById("checkout-form"),checkoutSuccess=document.getElementById("checkout-success"),continueShopping=document.getElementById("continue-shopping"),cartSummary=document.getElementById("cart-summary"),cartTotal=document.getElementById("cart-total"),cartStep=document.getElementById("cart-step"),checkoutStep=document.getElementById("checkout-step"),checkoutNext=document.getElementById("checkout-next"),backToCart=document.getElementById("back-to-cart");
 function saveCart(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(cart));}catch(e){console.warn("Could not save cart",e);}}
 function openCart(){cartOverlay?.classList.add("is-open");cartOverlay?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
