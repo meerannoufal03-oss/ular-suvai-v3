@@ -148,45 +148,143 @@ async function refreshPaymentStatus(){
   return null;
  }
 }
+let activeCheckout = null;
+let activeOrderId = "";
+let paymentIsConfirmed = false;
+let orderStatusTimer = null;
+let orderStatusCheckInProgress = false;
+let orderStatusAttempts = 0;
+
+function clearOrderStatusPolling() {
+ if(orderStatusTimer){window.clearInterval(orderStatusTimer);orderStatusTimer=null;}
+ orderStatusCheckInProgress=false;
+}
+function restorePayButton(button, original) {
+ if(!button)return;
+ button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);
+ button.innerHTML=original;
+}
+function completeSuccessfulPayment(result, button, original) {
+ if(paymentIsConfirmed)return;
+ paymentIsConfirmed=true;
+ clearOrderStatusPolling();
+ try{activeCheckout?.close();}catch(error){console.warn("Could not close Razorpay Checkout:",error);}
+ checkoutStep.hidden=true;
+ checkoutSuccess.hidden=false;
+ const paymentId=result.paymentId||result.payment_id||"";
+ document.getElementById("success-message").textContent=result.mode==="live"
+  ?"Your payment has been received and verified. Payment ID: "+paymentId+". Please keep this reference for your records."
+  :"Test payment verified successfully. Payment ID: "+paymentId+". No real money was collected in Test Mode.";
+ cart=[];saveCart();updateCount();
+ activeOrderId="";
+ restorePayButton(button,original);
+}
+async function fetchVerifiedOrderStatus(orderId) {
+ const statusUrl=PAYMENT_API_BASE+"/api/order-status?order_id="+encodeURIComponent(orderId);
+ const response=await fetch(statusUrl,{cache:"no-store"});
+ const data=await response.json();
+ if(!response.ok)throw new Error(data.error||"Could not check the payment status.");
+ return data;
+}
+function startOrderStatusPolling(orderId, button, original) {
+ activeOrderId=orderId;
+ if(orderStatusTimer)return;
+ orderStatusAttempts=0;
+ renderPaymentModeStatus("Waiting for Razorpay to confirm your payment. Please keep this page open.","pending");
+ if(button){button.disabled=true;button.textContent="Confirming payment...";}
+ orderStatusTimer=window.setInterval(async()=>{
+  if(paymentIsConfirmed){clearOrderStatusPolling();return;}
+  if(orderStatusCheckInProgress)return;
+  orderStatusCheckInProgress=true;
+  orderStatusAttempts++;
+  try{
+   const status=await fetchVerifiedOrderStatus(orderId);
+   if(status.verified===true&&status.paid===true){
+    completeSuccessfulPayment(status,button,original);
+    return;
+   }
+  }catch(error){
+   console.warn("Razorpay order status is still pending:",error.message);
+  }finally{
+   orderStatusCheckInProgress=false;
+  }
+  if(orderStatusAttempts>=80&&!paymentIsConfirmed){
+   clearOrderStatusPolling();
+   activeOrderId="";
+   renderPaymentModeStatus("Payment is not yet confirmed by Razorpay. If your bank account was debited, check the Razorpay payment status before trying again.","pending");
+   restorePayButton(button,original);
+  }
+ },2500);
+}
+
 checkoutForm?.addEventListener("submit",async e=>{
  e.preventDefault();
  if(!cart.length||!checkoutForm.reportValidity())return;
  const button=document.getElementById("razorpay-pay-button");
  const original=button.innerHTML;
  const items=cart.map(item=>({name:item.name,quantity:item.quantity,category:item.category}));
- const addressParts = ["customer-house","customer-street","customer-area","customer-city","customer-pincode"].map(id=>document.getElementById(id)?.value.trim()||"");
+ const addressParts=["customer-house","customer-street","customer-area","customer-city","customer-pincode"].map(id=>document.getElementById(id)?.value.trim()||"");
  if(addressParts.some(part=>!part)){alert("Please complete all delivery address fields.");return;}
  const customer={name:customerName.value.trim(),countryCode:document.getElementById("country-code").value,phone:customerPhone.value,address:addressParts.join(", ")};
  button.disabled=true;button.textContent="Connecting to Razorpay...";
- try {
+ paymentIsConfirmed=false;activeOrderId="";activeCheckout=null;clearOrderStatusPolling();
+ try{
   const health=await refreshPaymentStatus();
   if(!health?.configured)throw new Error("Razorpay is not configured or the payment service cannot be reached.");
-  if(!health.canAcceptPayments){
-   throw new Error(health.mode==="live"
-    ?"The backend currently has a Live key, but Live checkout is locked. Set a matching Razorpay Test Key ID and Test Key Secret in Render to run a simulated test."
-    :"Razorpay checkout is currently unavailable. Please check the payment service configuration.");
-  }
-  button.disabled=true;
-  button.textContent="Connecting to Razorpay...";
+  if(!health.canAcceptPayments)throw new Error("Razorpay checkout is currently unavailable. Please check the payment service configuration.");
   const response=await fetch(PAYMENT_API_BASE+"/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items,customer})});
-  const order=await response.json();if(!response.ok)throw new Error(order.error||"Could not create Razorpay order.");
+  const order=await response.json();
+  if(!response.ok)throw new Error(order.error||"Could not create Razorpay order.");
   if(!window.Razorpay)throw new Error("Razorpay Checkout did not load. Refresh and try again.");
-  const checkout=new window.Razorpay({key:order.keyId,amount:order.amount,currency:order.currency,name:"Ular Suvai",description:"Ular Suvai Online Order",order_id:order.orderId,prefill:{name:customer.name,contact:customer.phone},theme:{color:"#74350b"},
+
+  activeOrderId=order.orderId;
+  const checkout=new window.Razorpay({
+   key:order.keyId,amount:order.amount,currency:order.currency,name:"Ular Suvai",
+   description:"Ular Suvai Online Order",order_id:order.orderId,
+   prefill:{name:customer.name,contact:customer.phone},
+   theme:{color:"#74350b"},
    handler:async result=>{
     try{
      const verify=await fetch(PAYMENT_API_BASE+"/api/verify-payment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(result)});
-     const checked=await verify.json();if(!verify.ok||!checked.verified)throw new Error(checked.error||"Payment verification failed.");
-     checkoutStep.hidden=true;checkoutSuccess.hidden=false;
-     document.getElementById("success-message").textContent=checked.mode==="live"?"Your payment has been received and verified. Payment ID: "+checked.paymentId+". Please keep this reference for your records.":"Test payment verified successfully. Payment ID: "+checked.paymentId+". No real money was collected in Test Mode.";
-     cart=[];saveCart();updateCount();
-    }catch(err){alert(err.message);}
-    finally{button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);button.innerHTML=original;}
+     const checked=await verify.json();
+     if(verify.ok&&checked.verified===true){
+      completeSuccessfulPayment(checked,button,original);
+      return;
+     }
+     // The UPI app can complete before Checkout delivers its handler response.
+     // Confirm with Razorpay's server-side order/payment records instead of
+     // leaving the customer stuck on the QR screen.
+     startOrderStatusPolling(order.orderId,button,original);
+    }catch(error){
+     console.warn("Immediate payment verification is pending:",error.message);
+     startOrderStatusPolling(order.orderId,button,original);
+    }
    },
-   modal:{ondismiss:()=>{button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);button.innerHTML=original;}}
+   modal:{
+    ondismiss:()=>{
+     if(paymentIsConfirmed)return;
+     if(activeOrderId){
+      // A UPI payment can be confirmed just after the customer closes Checkout.
+      startOrderStatusPolling(activeOrderId,button,original);
+     }else restorePayButton(button,original);
+    }
+   }
   });
-  checkout.on("payment.failed",failure=>{alert(failure.error?.description||"Payment failed or was cancelled. Please try again.");button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);button.innerHTML=original;});
+  activeCheckout=checkout;
+  checkout.on("payment.failed",failure=>{
+   const description=failure.error?.description||"Payment failed or was cancelled. Please check the payment status before retrying.";
+   renderPaymentModeStatus("Razorpay could not complete this payment: "+description,"error");
+   alert(description);
+  });
+  // Poll while the Razorpay popup is open; this is especially useful for UPI QR.
+  startOrderStatusPolling(order.orderId,button,original);
   checkout.open();
- }catch(error){alert(error.message);button.disabled=!(paymentHealth?.configured&&paymentHealth?.canAcceptPayments);button.innerHTML=original;}
+ }catch(error){
+  clearOrderStatusPolling();
+  activeOrderId="";
+  alert(error.message);
+  restorePayButton(button,original);
+ }
 });
 continueShopping?.addEventListener("click",()=>{checkoutForm.reset();showCartStep();renderCart();closeCart();});
 async function initialiseStorefront() {
