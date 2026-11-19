@@ -785,9 +785,10 @@
             <div class="payment-methods-info">
                 <h4>Secure payment with Razorpay</h4>
                 <p>Choose from the payment methods available in the secure Razorpay checkout window, such as UPI, Debit / Credit Cards, Net Banking and Wallets. Available methods depend on your Razorpay account activation.</p>
+                <p id="payment-mode-status" class="demo-note" role="status" aria-live="polite">Checking Razorpay payment mode...</p>
                 <p class="demo-note">Your payment is confirmed only after the server verifies the Razorpay transaction.</p>
             </div>
-            <button type="submit" class="checkout-submit" id="razorpay-pay-button">Pay with Razorpay <i class="fa-solid fa-lock"></i></button>
+            <button type="submit" class="checkout-submit" id="razorpay-pay-button" aria-describedby="payment-mode-status" disabled>Pay with Razorpay <i class="fa-solid fa-lock"></i></button>
             <p class="demo-note">Secure online payment powered by Razorpay. Do not close the page until payment verification finishes.</p></form>
         </div>
         <div class="checkout-success" id="checkout-success" role="status" hidden>
@@ -799,7 +800,7 @@
 </div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script src="script.js"></script>
+<script src="script.js?v=20261119-payment-readiness-1"></script>
 
 </body>
 </html>
