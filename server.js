@@ -220,6 +220,91 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
+// Server-side status lookup for UPI QR / delayed Checkout callbacks.
+// Only orders created by this Ular Suvai checkout can be queried.
+app.get("/api/order-status", async (req, res) => {
+  try {
+    const orderId = String(req.query.order_id || "");
+    if (!/^order_[A-Za-z0-9]+$/.test(orderId)) {
+      return res.status(400).json({ error: "A valid Razorpay order ID is required." });
+    }
+
+    const razorpay = getRazorpay();
+    let order = await razorpay.orders.fetch(orderId);
+    const expectedCheckoutNote = `ular_suvai_${PAYMENT_MODE}_checkout`;
+    if (
+      order.id !== orderId ||
+      !String(order.receipt || "").startsWith("us_") ||
+      order.notes?.checkout !== expectedCheckoutNote
+    ) {
+      return res.status(404).json({ error: "Ular Suvai order was not found." });
+    }
+
+    const expectedAmount = order.amount;
+    if (
+      !Number.isSafeInteger(expectedAmount) ||
+      expectedAmount < 100 ||
+      expectedAmount > 5_000_000 ||
+      order.currency !== "INR"
+    ) {
+      return res.status(409).json({ error: "Order amount or currency is invalid." });
+    }
+
+    let payments = await razorpay.orders.fetchPayments(orderId);
+    const isExactCapturedPayment = payment =>
+      payment.order_id === orderId &&
+      payment.currency === "INR" &&
+      payment.amount === expectedAmount &&
+      payment.captured === true &&
+      payment.status === "captured";
+
+    let capturedPayment = (payments.items || []).find(isExactCapturedPayment);
+
+    // Auto-capture is enabled on new orders. This fallback handles a delayed
+    // authorization by attempting capture once when the customer is polling.
+    if (!capturedPayment) {
+      const authorizedPayment = (payments.items || []).find(payment =>
+        payment.order_id === orderId &&
+        payment.currency === "INR" &&
+        payment.amount === expectedAmount &&
+        payment.status === "authorized"
+      );
+      if (authorizedPayment) {
+        try {
+          await razorpay.payments.capture(authorizedPayment.id, expectedAmount, "INR");
+        } catch (captureError) {
+          // A concurrent auto-capture may have completed the same payment.
+          console.warn("Order status capture check:", captureError.message);
+        }
+        order = await razorpay.orders.fetch(orderId);
+        payments = await razorpay.orders.fetchPayments(orderId);
+        capturedPayment = (payments.items || []).find(isExactCapturedPayment);
+      }
+    }
+
+    const verified = Boolean(
+      order.status === "paid" &&
+      order.amount_paid === expectedAmount &&
+      order.amount_due === 0 &&
+      capturedPayment
+    );
+    res.setHeader("Cache-Control", "no-store");
+    return res.json({
+      ok: true,
+      verified,
+      paid: verified,
+      orderId,
+      status: order.status,
+      paymentId: capturedPayment?.id || null,
+      amount: expectedAmount,
+      currency: "INR",
+      mode: PAYMENT_MODE
+    });
+  } catch (error) {
+    sendError(res, error);
+  }
+});
+
 app.post("/api/verify-payment", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
