@@ -132,8 +132,10 @@ async function refreshPaymentStatus(){
    renderPaymentModeStatus("Razorpay is not configured. Payment checkout is unavailable.", "error");
   }else if(health.mode==="test"&&ready){
    renderPaymentModeStatus("Razorpay Test Mode is active. Payments are simulated; no real money is collected.", "test");
+  }else if(health.mode==="live"&&!ready&&health.livePaymentsEnabled===false){
+   renderPaymentModeStatus("Live payments are temporarily paused. Razorpay must approve this website domain before customers can pay.", "locked");
   }else if(health.mode==="live"&&!ready){
-   renderPaymentModeStatus("A Live key is connected, but checkout is safely locked. Switch to the matching Razorpay Test keys to run a no-money test.", "locked");
+   renderPaymentModeStatus("A Live key is connected, but checkout is safely locked. Please check the Razorpay Live checkout settings.", "locked");
   }else if(health.mode==="live"&&ready){
    renderPaymentModeStatus("Razorpay Live Mode is enabled. Customers will be charged real money.", "live");
   }else{
@@ -154,6 +156,7 @@ let paymentIsConfirmed = false;
 let orderStatusTimer = null;
 let orderStatusCheckInProgress = false;
 let orderStatusAttempts = 0;
+let latestPaymentFailure = null;
 
 function clearOrderStatusPolling() {
  if(orderStatusTimer){window.clearInterval(orderStatusTimer);orderStatusTimer=null;}
@@ -177,6 +180,7 @@ function completeSuccessfulPayment(result, button, original) {
   :"Test payment verified successfully. Payment ID: "+paymentId+". No real money was collected in Test Mode.";
  cart=[];saveCart();updateCount();
  activeOrderId="";
+ latestPaymentFailure=null;
  restorePayButton(button,original);
 }
 async function fetchVerifiedOrderStatus(orderId) {
@@ -203,6 +207,14 @@ function startOrderStatusPolling(orderId, button, original) {
     completeSuccessfulPayment(status,button,original);
     return;
    }
+   const attempt=status.paymentAttempt;
+   if(attempt?.status==="failed"){
+    latestPaymentFailure={
+     id:attempt.id||"",
+     description:attempt.errorDescription||"Razorpay reported this payment attempt as failed.",
+     reason:attempt.errorReason||""
+    };
+   }
   }catch(error){
    console.warn("Razorpay order status is still pending:",error.message);
   }finally{
@@ -211,7 +223,11 @@ function startOrderStatusPolling(orderId, button, original) {
   if(orderStatusAttempts>=80&&!paymentIsConfirmed){
    clearOrderStatusPolling();
    activeOrderId="";
-   renderPaymentModeStatus("Payment is not yet confirmed by Razorpay. If your bank account was debited, check the Razorpay payment status before trying again.","pending");
+   try{activeCheckout?.close();}catch(error){console.warn("Could not close Razorpay Checkout:",error);}
+   const failedDetail=latestPaymentFailure
+    ? "Latest Razorpay attempt "+(latestPaymentFailure.id||"")+" failed: "+latestPaymentFailure.description+". "
+    : "";
+   renderPaymentModeStatus(failedDetail+"Razorpay has not confirmed a captured payment. Do not retry if your bank was debited; check the payment status and refund/reversal with your bank or Razorpay first.","error");
    restorePayButton(button,original);
   }
  },2500);
@@ -227,7 +243,7 @@ checkoutForm?.addEventListener("submit",async e=>{
  if(addressParts.some(part=>!part)){alert("Please complete all delivery address fields.");return;}
  const customer={name:customerName.value.trim(),countryCode:document.getElementById("country-code").value,phone:customerPhone.value,address:addressParts.join(", ")};
  button.disabled=true;button.textContent="Connecting to Razorpay...";
- paymentIsConfirmed=false;activeOrderId="";activeCheckout=null;clearOrderStatusPolling();
+ paymentIsConfirmed=false;activeOrderId="";activeCheckout=null;latestPaymentFailure=null;clearOrderStatusPolling();
  try{
   const health=await refreshPaymentStatus();
   if(!health?.configured)throw new Error("Razorpay is not configured or the payment service cannot be reached.");
@@ -272,9 +288,16 @@ checkoutForm?.addEventListener("submit",async e=>{
   });
   activeCheckout=checkout;
   checkout.on("payment.failed",failure=>{
-   const description=failure.error?.description||"Payment failed or was cancelled. Please check the payment status before retrying.";
-   renderPaymentModeStatus("Razorpay could not complete this payment: "+description,"error");
-   alert(description);
+   const error=failure.error||{};
+   const metadata=error.metadata||{};
+   latestPaymentFailure={
+    id:metadata.payment_id||"",
+    description:error.description||"Razorpay reported this payment attempt as failed.",
+    reason:error.reason||""
+   };
+   // UPI retries can produce a failed attempt followed by a captured payment
+   // on the same order. Keep checking server-side status before finalising.
+   renderPaymentModeStatus("One Razorpay payment attempt failed: "+latestPaymentFailure.description+" Checking whether a later UPI retry succeeds...","pending");
   });
   // Poll while the Razorpay popup is open; this is especially useful for UPI QR.
   startOrderStatusPolling(order.orderId,button,original);
