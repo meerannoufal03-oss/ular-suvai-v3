@@ -288,6 +288,9 @@ app.get("/api/order-status", async (req, res) => {
       order.amount_due === 0 &&
       capturedPayment
     );
+    const latestPayment = [...(payments.items || [])]
+      .sort((a, b) => Number(b.created_at || 0) - Number(a.created_at || 0))[0] || null;
+
     res.setHeader("Cache-Control", "no-store");
     return res.json({
       ok: true,
@@ -296,6 +299,15 @@ app.get("/api/order-status", async (req, res) => {
       orderId,
       status: order.status,
       paymentId: capturedPayment?.id || null,
+      paymentAttempt: latestPayment ? {
+        id: latestPayment.id || null,
+        status: latestPayment.status || null,
+        method: latestPayment.method || null,
+        captured: latestPayment.captured === true,
+        errorCode: latestPayment.error_code || null,
+        errorDescription: latestPayment.error_description || null,
+        errorReason: latestPayment.error_reason || null
+      } : null,
       amount: expectedAmount,
       currency: "INR",
       mode: PAYMENT_MODE
